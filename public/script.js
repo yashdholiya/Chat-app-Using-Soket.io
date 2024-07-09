@@ -109,7 +109,6 @@ function loginUser(usernameInput, password) {
     });
 }
 
-// Function to initialize chat functionality after login
 function initializeChat() {
   fetch("http://localhost:2123/users")
     .then((response) => response.json())
@@ -119,11 +118,26 @@ function initializeChat() {
         onlineUsersList.innerHTML = "";
         users.forEach((user) => {
           const userItem = document.createElement("li");
-          userItem.textContent =
-            user.username === username
-              ? `${user.username} (You)`
-              : user.username +
-                (user.status === "online" ? " (Online)" : " (Offline)");
+          if (user.username === username) {
+            userItem.textContent = `${user.username} (You)`;
+          } else if (user.status === "online") {
+            userItem.textContent = `${user.username} (Online)`;
+          } else {
+            const lastSeenTime = new Date(user.last_seen);
+            const currentTime = new Date();
+            const offlineDuration = Math.floor(
+              (currentTime - lastSeenTime) / (60 * 1000)
+            ); 
+
+            if (isNaN(offlineDuration)) {
+              userItem.textContent = `${user.username} (Offline)`;
+            } else {
+              const hours = Math.floor(offlineDuration / 60);
+              const minutes = offlineDuration % 60;
+              userItem.textContent = `${user.username} (Offline for ${hours}h ${minutes}m)`;
+            }
+          }
+
           if (user.status === "online" && user.username !== username) {
             userItem.addEventListener("click", () => {
               currentRecipient = user.username;
@@ -152,7 +166,6 @@ function initializeChat() {
     timeSpan.className = "timestamp";
     timeSpan.innerText = messageData.timestamp;
     p.appendChild(timeSpan);
-    0;
     div.appendChild(p);
 
     if (isPrivate) {
@@ -236,22 +249,29 @@ function initializeChat() {
     console.log("Private message received:", messageData);
   });
 
-  // Listen for user status updates (online/offline)
-  socket.on("user-status-change", ({ username, status, duration }) => {
-    updateUserStatus(username, status);
+  socket.on("user-status-change", ({ username, status, disconnectTime }) => {
+    const onlineUsersList = document.getElementById("onlineUsersList");
+    if (onlineUsersList) {
+      // Update user status and offline duration
+      const userItems = onlineUsersList.getElementsByTagName("li");
+      for (let i = 0; i < userItems.length; i++) {
+        const userItem = userItems[i];
+        if (userItem.textContent.startsWith(username)) {
+          if (status === "offline") {
+            const lastSeenTime = new Date(disconnectTime).getTime();
+            const currentTime = new Date().getTime();
+            const offlineDuration = currentTime - lastSeenTime;
 
-    if (status === "offline") {
-      const offlineMessage = document.createElement("div");
-      offlineMessage.textContent = `${username} went offline. Duration: ${duration} ms`;
-      console.log("user ...", duration);
-      // Append this message to a suitable container in your UI
-      const offlineMessagesContainer = document.getElementById(
-        "offlineMessagesContainer"
-      );
-      if (offlineMessagesContainer) {
-        offlineMessagesContainer.appendChild(offlineMessage);
-      } else {
-        console.error("Element with ID 'offlineMessagesContainer' not found.");
+            if (isNaN(offlineDuration)) {
+              userItem.textContent = `${username} (Offline)`;
+            } else {
+              userItem.textContent = `${username} (Offline for ${offlineDuration} ms)`;
+            }
+          } else {
+            userItem.textContent = `${username} (Online)`;
+          }
+          break;
+        }
       }
     }
   });
@@ -272,18 +292,3 @@ function openPrivateChat(recipient) {
 }
 // Initial view setup
 showView("registerContainer");
-
-// // Function to open a private chat view
-// function openPrivateChat(recipient) {
-//   showView("privateChatContainer");
-//   document.getElementById("privateRecipient").textContent = recipient;
-//   clearPrivateChatListeners();
-// }
-
-// // Function to clear private chat related listeners
-// function clearPrivateChatListeners() {
-//   socket.off("private-message");
-// }
-// Event listener for the back button in the private chat container
-
-

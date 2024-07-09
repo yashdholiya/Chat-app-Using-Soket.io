@@ -143,19 +143,15 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Handle disconnect event
   socket.on("disconnect", () => {
     let userId = null;
     for (const id in onlineUsers) {
       if (onlineUsers[id].socketId === socket.id) {
         userId = id;
 
-        // Calculate offline duration
-        const disconnectTime = new Date();
-        const connectTime = onlineUsers[id].connectTime;
-
-        const offlineDuration = disconnectTime - connectTime;
-        console.log("offline time ....", disconnectTime);
         // Update last seen time and status in the database
+        const disconnectTime = new Date();
         const updateQuery =
           "UPDATE users SET status = 'offline', last_seen = ? WHERE userid = ?";
         connection.query(
@@ -166,13 +162,13 @@ io.on("connection", (socket) => {
               console.error("Error updating user status:", err);
             } else {
               // Fetch updated user list and broadcast it
-              const query = "SELECT userid, username, status FROM users";
+              const query =
+                "SELECT userid, username, status, last_seen FROM users";
               connection.query(query, (error, results) => {
                 if (error) {
                   console.error("Error fetching users:", error);
                 } else {
                   io.emit("update-users", results);
-                  console.log(" offline time .....", userId ,results );
                 }
               });
             }
@@ -183,9 +179,8 @@ io.on("connection", (socket) => {
         io.emit("user-status-change", {
           username: onlineUsers[id].username,
           status: "offline",
-          duration: offlineDuration,
+          disconnectTime: disconnectTime.getTime(), // Sending disconnect time to client
         });
-        console.log(onlineUsers);
 
         delete onlineUsers[id];
         break;
