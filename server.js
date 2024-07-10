@@ -466,28 +466,30 @@ io.on("connection", (socket) => {
     }
   });
 });
-// Fetch messages between two users
+// API endpoint to get messages between two users
 app.get("/messages", (req, res) => {
-  const { user1, user2 } = req.query;
+  const { sender, recipient } = req.query;
 
   const query = `
-    SELECT id, sender, recipient, message, created_at 
-    FROM messages 
+    SELECT * FROM messages 
     WHERE (sender = ? AND recipient = ?) 
        OR (sender = ? AND recipient = ?)
     ORDER BY created_at ASC
   `;
 
-  connection.query(query, [user1, user2, user2, user1], (error, results) => {
-    if (error) {
-      console.error("Error fetching messages:", error);
-      res.status(500).send("Error fetching messages");
-    } else {
-      res.json(results);
-      console.log("result....", results);
-      // console.log("query......",query);
+  connection.query(
+    query,
+    [sender, recipient, recipient, sender],
+    (error, results) => {
+      if (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).send("Error fetching messages");
+      } else {
+        console.log("Fetched messages:", results);
+        res.json(results);
+      }
     }
-  });
+  );
 });
 
 // Start server

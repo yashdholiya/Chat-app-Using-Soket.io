@@ -635,49 +635,31 @@ function initializeChat() {
 }
 
 // Function to open a private chat view
-// function openPrivateChat(recipient) {
-//   showView("privateChatContainer");
-//   const privateRecipient = document.getElementById("privateRecipient");
-//   if (privateRecipient) {
-//     privateRecipient.textContent = recipient;
-//   } else {
-//     console.error("Element with ID 'privateRecipient' not found.");
+function openPrivateChat(recipient) {
+  showView("privateChatContainer");
+  const privateRecipient = document.getElementById("privateRecipient");
+  if (privateRecipient) {
+    privateRecipient.textContent = recipient;
+  } else {
+    console.error("Element with ID 'privateRecipient' not found.");
 
-//     showView;
-//   }
-// }
+    fetchMessages(username, recipient);
+  }
+}
 // Function to fetch messages between the logged-in user and the recipient
-function fetchMessages(user1, user2) {
-  fetch(`http://localhost:2123/messages?user1=${user1}&user2=${user2}`)
-    .then((response) => response.json())
-    .then((messages) => {
-      const privateMessages = document.getElementById("privateMessages");
-      if (privateMessages) {
-        privateMessages.innerHTML = "";
-        messages.forEach((message) => {
-          const div = document.createElement("div");
-          div.className = message.sender === user1 ? "sent" : "received";
-          const p = document.createElement("p");
-          p.textContent = `${message.sender}: ${message.message}`;
-
-          const timeSpan = document.createElement("span");
-          timeSpan.className = "timestamp";
-          timeSpan.innerText = new Date(message.created_at).toLocaleTimeString(
-            [],
-            {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }
-          );
-          p.appendChild(timeSpan);
-          div.appendChild(p);
-
-          privateMessages.appendChild(div);
-        });
-        privateMessages.scrollTop = privateMessages.scrollHeight;
-      } else {
-        console.error("Element with ID 'privateMessages' not found.");
+function fetchMessages(sender, recipient) {
+  fetch(
+    `http://localhost:2123/messages?sender=${sender}&recipient=${recipient}`
+  )
+    .then((response) => response.text())
+    .then((text) => {
+      try {
+        const data = JSON.parse(text);
+        console.log("Fetched messages:", data);
+        displayMessages(data);
+      } catch (error) {
+        console.error("Failed to parse JSON response:", error);
+        console.error("Raw response:", text);
       }
     })
     .catch((error) => {
@@ -686,18 +668,18 @@ function fetchMessages(user1, user2) {
 }
 
 // Call this function when opening a private chat
-function openPrivateChat(recipient) {
-  showView("privateChatContainer");
-  const privateRecipient = document.getElementById("privateRecipient");
-  if (privateRecipient) {
-    privateRecipient.textContent = recipient;
-  } else {
-    console.error("Element with ID 'privateRecipient' not found.");
-  }
+// function openPrivateChat(recipient) {
+//   showView("privateChatContainer");
+//   const privateRecipient = document.getElementById("privateRecipient");
+//   if (privateRecipient) {
+//     privateRecipient.textContent = recipient;
+//   } else {
+//     console.error("Element with ID 'privateRecipient' not found.");
+//   }
 
-  // Fetch and display messages between the logged-in user and the recipient
-  fetchMessages(username, recipient);
-}
+//   // Fetch and display messages between the logged-in user and the recipient
+//   fetchMessages(username, recipient);
+// }
 
 // Initial view setup
 showView("registerContainer");
