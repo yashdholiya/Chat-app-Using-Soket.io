@@ -179,7 +179,7 @@ io.on("connection", (socket) => {
         io.emit("user-status-change", {
           username: onlineUsers[id].username,
           status: "offline",
-          disconnectTime: disconnectTime.getTime(), // Sending disconnect time to client
+          disconnectTime: disconnectTime.getTime(),
         });
 
         delete onlineUsers[id];
