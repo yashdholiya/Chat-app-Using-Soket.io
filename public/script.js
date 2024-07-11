@@ -1,5 +1,3 @@
-
-
 /*
 const socket = io();
 let userId = "";
@@ -886,20 +884,6 @@ function sendPrivateMessage(to, message) {
   socket.emit("private-message", { to, messageData });
   displayPrivateMessage(messageData, true);
 }
-
-// Function to display a private message in the chat interface
-// function displayPrivateMessage(messageData, isSender) {
-//   const privateMessages = document.getElementById("privateMessages");
-//   const messageElement = document.createElement("div");
-//   messageElement.className = `message ${isSender ? "sent" : "received"}`;
-//   messageElement.innerHTML = `
-//     <div class="message-user">${messageData.user}</div>
-//     <div class="message-content">${messageData.message}</div>
-//     <div class="message-timestamp">${messageData.timestamp.toLocaleTimeString()}</div>
-//   `;
-//   privateMessages.appendChild(messageElement);
-//   privateMessages.scrollTop = privateMessages.scrollHeight;
-// }
 function displayPrivateMessage(messageData, isSender) {
   const privateMessages = document.getElementById("privateMessages");
   const messageElement = document.createElement("div");
