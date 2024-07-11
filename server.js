@@ -798,12 +798,17 @@ io.on("connection", (socket) => {
       (user) => user.username === to
     );
     if (recipient) {
-      // Save message to the database
+      console.log("messages...", messageData);
+
+      // Add a timestamp to the message data
+      messageData.timestamp = new Date().toISOString();
+
+      // Save message to the database with timestamp
       const query =
-        "INSERT INTO messages (sender, recipient, message) VALUES (?, ?, ?)";
+        "INSERT INTO messages (sender, recipient, message, created_at) VALUES (?, ?, ?, ?)";
       connection.query(
         query,
-        [messageData.user, to, messageData.message],
+        [messageData.user, to, messageData.message, messageData.timestamp],
         (error, results) => {
           if (error) {
             console.error("Error saving message:", error);
