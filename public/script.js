@@ -393,3 +393,201 @@ socket.on("user-status-change", ({ username, status, disconnectTime }) => {
 
 // Initial setup: Show registration/login view
 showView("registerContainer");
+
+// const socket = io();
+// let userId = "";
+// let username = "";
+// let currentRecipient = null;
+// const MESSAGES_PER_PAGE = 10;
+// let currentPage = 1;
+
+// // Function to switch between registration, login, chat, and private chat views
+// function showView(viewId) {
+//   hideAllViews();
+//   const viewElement = document.getElementById(viewId);
+//   if (viewElement) {
+//     viewElement.style.display = "block";
+//   } else {
+//     console.error(`Element with ID ${viewId} not found.`);
+//   }
+// }
+
+// // Helper function to hide all views
+// function hideAllViews() {
+//   document.getElementById("registerContainer").style.display = "none";
+//   document.getElementById("loginContainer").style.display = "none";
+//   document.getElementById("chatContainer").style.display = "none";
+//   document.getElementById("privateChatContainer").style.display = "none";
+// }
+
+// // Example check for form submission
+// document.getElementById("registerForm").addEventListener("submit", (event) => {
+//   event.preventDefault();
+//   const regUserId = document.getElementById("regUserId").value;
+//   const regUsername = document.getElementById("regUsername").value;
+//   const regPassword = document.getElementById("regPassword").value;
+
+//   if (
+//     regUserId.trim() === "" ||
+//     regUsername.trim() === "" ||
+//     regPassword.trim() === ""
+//   ) {
+//     alert("Please fill in all required fields.");
+//     return;
+//   }
+
+//   // Proceed with form submission
+//   fetch("/register", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       userid: regUserId,
+//       username: regUsername,
+//       password: regPassword,
+//     }),
+//   })
+//     .then((response) => response.text())
+//     .then((data) => {
+//       alert(data);
+//     })
+//     .catch((error) => {
+//       console.error("Error registering user:", error);
+//       alert("Error registering user");
+//     });
+// });
+
+// // Event listener for login form submission
+// document.getElementById("loginForm").addEventListener("submit", (event) => {
+//   event.preventDefault();
+//   const loginUsername = document.getElementById("loginUsername").value;
+//   const loginPassword = document.getElementById("loginPassword").value;
+
+//   fetch("/login", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//     body: JSON.stringify({
+//       username: loginUsername,
+//       password: loginPassword,
+//     }),
+//   })
+//     .then((response) => response.json())
+//     .then((data) => {
+//       alert(data.message);
+//       userId = data.userid;
+//       username = data.username;
+//       document.getElementById("currentUser").textContent = username;
+//       showView("chatContainer");
+//       socket.emit("joinRoom", { userId, username });
+//     })
+//     .catch((error) => {
+//       console.error("Error logging in:", error);
+//       alert("Invalid username or password");
+//     });
+// });
+
+// // Event listener for sending private messages
+// document
+//   .getElementById("privateMessageForm")
+//   .addEventListener("submit", (event) => {
+//     event.preventDefault();
+//     const messageInput = document.getElementById("privateMessageInput").value;
+//     if (messageInput.trim() === "") {
+//       return;
+//     }
+//     sendPrivateMessage(currentRecipient, messageInput);
+//     document.getElementById("privateMessageInput").value = "";
+//   });
+
+// // Event listener for back to chat button in private chat view
+// document.getElementById("backToChatBtn").addEventListener("click", () => {
+//   showView("chatContainer");
+//   currentRecipient = null;
+//   document.getElementById("privateMessagesList").innerHTML = "";
+//   currentPage = 1; // Reset current page on back to chat
+// });
+
+// // Function to send a private message to another user
+// function sendPrivateMessage(to, message) {
+//   const messageData = {
+//     user: username,
+//     message,
+//     timestamp: new Date().toISOString(),
+//   };
+//   socket.emit("private-message", { to, messageData });
+//   displayPrivateMessage(messageData, true);
+// }
+
+// function displayPrivateMessage(messageData, isSender) {
+//   const privateMessagesList = document.getElementById("privateMessagesList");
+//   const messageElement = document.createElement("div");
+//   messageElement.className = `message ${isSender ? "sent" : "received"}`;
+
+//   // Format timestamp for display
+//   const timestamp = new Date(messageData.timestamp).toLocaleTimeString();
+
+//   messageElement.innerHTML = `
+//     <div class="message-user">${messageData.user}</div>
+//     <div class="message-content">${messageData.message}</div>
+//     <div class="message-timestamp">${timestamp}</div>
+//   `;
+//   privateMessagesList.appendChild(messageElement);
+//   privateMessagesList.scrollTop = privateMessagesList.scrollHeight;
+// }
+
+// // Socket event to receive private messages
+// socket.on("private-messages", (messageData) => {
+//   displayPrivateMessage(messageData, false); // Assuming false means received message
+// });
+
+// // Socket event to update online users list
+// socket.on("update-users", (users) => {
+//   const onlineUsersList = document.getElementById("onlineUsersList");
+//   onlineUsersList.innerHTML = "";
+//   users.forEach((user) => {
+//     const userElement = document.createElement("li");
+//     userElement.textContent = `${user.username} (${user.status})`;
+//     userElement.addEventListener("click", () => {
+//       if (user.userid !== userId) {
+//         currentRecipient = user.username;
+//         document.getElementById(
+//           "privateChatWith"
+//         ).textContent = `Chat with ${user.username}`;
+//         fetchPrivateMessages(user.username);
+//         showView("privateChatContainer");
+//       }
+//     });
+//     onlineUsersList.appendChild(userElement);
+//   });
+// });
+
+// function fetchPrivateMessages(recipient) {
+//   fetch(
+//     `/messages?sender=${username}&recipient=${recipient}&limit=${MESSAGES_PER_PAGE}&page=${currentPage}`
+//   )
+//     .then((response) => response.json())
+//     .then((messages) => {
+//       messages.reverse().forEach((message) => {
+//         displayPrivateMessage(message, message.sender === username);
+//         console.log("desplay mesages ...", message);
+//       });
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching private messages:", error);
+//     });
+// }
+
+// // Event listener for scrolling to load more messages
+// document.getElementById("privateMessages").addEventListener("scroll", () => {
+//   const privateMessages = document.getElementById("privateMessages");
+//   if (privateMessages.scrollTop === 0) {
+//     currentPage++;
+//     fetchPrivateMessages(currentRecipient);
+//   }
+// });
+
+// // Initial setup: Show registration/login view
+// showView("registerContainer");

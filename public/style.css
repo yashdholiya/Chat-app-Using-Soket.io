@@ -114,6 +114,7 @@ button:hover {
   height: 600px;
   overflow: auto;
 }
+
 .container {
   display: none;
 }
@@ -133,3 +134,99 @@ button:hover {
 #privateMessagesList li {
   margin-bottom: 10px;
 }
+
+/* 
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+h2,
+h3 {
+  margin: 0;
+  padding: 10px 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input,
+button {
+  margin: 5px 0;
+  padding: 10px;
+  font-size: 16px;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+#registerContainer,
+#loginContainer,
+#chatContainer,
+#privateChatContainer {
+  display: none;
+  width: 300px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+#chatContainer,
+#privateChatContainer {
+  width: 500px;
+}
+
+#onlineUsersList {
+  list-style: none;
+  padding: 0;
+}
+
+#onlineUsersList li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+#onlineUsersList li:hover {
+  background-color: #eee;
+}
+
+#privateMessages {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.message {
+  padding: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+#privateMessageForm {
+  display: flex;
+}
+
+#privateMessageInput {
+  flex: 1;
+  padding: 10px;
+}
+
+#backToChatBtn {
+  margin-top: 10px;
+} */
