@@ -114,3 +114,22 @@ button:hover {
   height: 600px;
   overflow: auto;
 }
+.container {
+  display: none;
+}
+
+.user-item {
+  cursor: pointer;
+}
+
+#privateMessagesList {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  list-style-type: none;
+}
+
+#privateMessagesList li {
+  margin-bottom: 10px;
+}

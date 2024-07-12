@@ -51,7 +51,7 @@
 <!-- index.html -->
 
 
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -103,58 +103,57 @@
   <script src="script.js"></script>
 </body>
 
-</html> 
-<!-- <!DOCTYPE html>
+ </html> 
+<!-- 
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat Application</title>
+  <title>Chat App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+  <div id="registerContainer">
     <h2>Register</h2>
     <form id="registerForm">
-      <input type="text" id="regUserId" placeholder="User ID" required>
-      <input type="text" id="regUsername" placeholder="Username" required>
-      <input type="password" id="regPassword" placeholder="Password" required>
+      <input type="text" id="regUserId" placeholder="User ID" required><br>
+      <input type="text" id="regUsername" placeholder="Username" required><br>
+      <input type="password" id="regPassword" placeholder="Password" required><br>
       <button type="submit">Register</button>
+      <button type="button" onclick="showView('loginContainer')">Go to Login</button>
     </form>
-    <button onclick="showView('loginContainer')">Go to Login</button>
-
   </div>
 
   <div id="loginContainer">
     <h2>Login</h2>
     <form id="loginForm">
-      <input type="text" id="loginUsername" placeholder="Username" required>
-      <input type="password" id="loginPassword" placeholder="Password" required>
+      <input type="text" id="loginUsername" placeholder="Username" required><br>
+      <input type="password" id="loginPassword" placeholder="Password" required><br>
       <button type="submit">Login</button>
     </form>
   </div>
 
-  <div id="chatContainer" style="display: none;">
-    <h2>Chat</h2>
+  <div id="chatContainer">
+    <h2>Welcome, <span id="currentUser"></span></h2>
+    <h3>Online Users</h3>
     <ul id="onlineUsersList"></ul>
-    <button onclick="showView('registerContainer')">Register</button>
-    <button onclick="showView('loginContainer')">Logout</button>
   </div>
 
-  <div id="privateChatContainer" style="display: none;">
-    <h2 id="privateChatWith"></h2>
-    <div id="privateMessages" style="height: 400px; overflow-y: auto;">
-    </div>
-    <form id="privateChatForm">
-      <input type="text" id="privateMessageInput" placeholder="Type your message">
+  <div id="privateChatContainer">
+    <h2>Private Chat with <span id="privateChatRecipient"></span></h2>
+    <ul id="privateMessagesList"></ul>
+    <form id="sendPrivateMessageForm">
+      <input type="text" id="privateMessageInput" placeholder="Type a message" required>
       <button type="submit">Send</button>
     </form>
-    <button onclick="showView('chatContainer')">Back to Chat</button>
+    <button type="button" id="backToChatBtn">Back to Chat</button>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
 </body>
 
-</html> 
+</html> -->
