@@ -195,7 +195,6 @@
 // // Initial setup: Show registration/login view
 // showView("registerContainer");
 /*                                                                       this is chat real code                                                                       */
-
 // const socket = io();
 // let userId = "";
 // let username = "";
@@ -394,7 +393,6 @@
 
 // // Initial setup: Show registration/login view
 // showView("registerContainer");
-
 const socket = io();
 let userId = "";
 let username = "";
@@ -402,6 +400,7 @@ let currentRecipient = null;
 let currentMessages = []; // To store fetched messages
 let currentPage = 1; // Current page number for pagination
 const pageSize = 10; // Number of messages to fetch per page
+let isLoadingMessages = false; // Flag to prevent multiple simultaneous requests
 
 // Function to switch between registration, login, chat, and private chat views
 function showView(viewId) {
@@ -484,6 +483,8 @@ document.getElementById("loginForm").addEventListener("submit", (event) => {
       document.getElementById("currentUser").textContent = username;
       showView("chatContainer");
       socket.emit("joinRoom", { userId, username });
+      // Load initial messages when user logs in
+      loadMessages();
     })
     .catch((error) => {
       console.error("Error logging in:", error);
@@ -555,7 +556,6 @@ function fetchPrivateMessages(recipient, page = 1, pageSize = 10) {
 // Function to display messages in the chat interface
 function displayFetchedMessages(messages) {
   const privateMessages = document.getElementById("privateMessages");
-  privateMessages.innerHTML = "";
 
   messages.forEach((message) => {
     const messageData = {
@@ -568,6 +568,25 @@ function displayFetchedMessages(messages) {
 
   privateMessages.scrollTop = privateMessages.scrollHeight;
 }
+
+// Function to load more messages when scrolling to top
+function loadMoreMessages() {
+  // alert("...");
+
+  if (isLoadingMessages) return;
+  isLoadingMessages = true;
+  currentPage++;
+  fetchPrivateMessages(currentRecipient, currentPage, pageSize);
+}
+
+// Scroll event listener to load more messages when reaching the top
+document.querySelector("#privateMessages").addEventListener("scroll", () => {
+  const privateMessages = document.getElementById("privateMessages");
+  if (privateMessages.scrollTop === 0) {
+    // alert("");
+    loadMoreMessages();
+  }
+});
 
 // Socket event to update online users list
 socket.on("update-users", (users) => {
