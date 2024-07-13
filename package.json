@@ -19,6 +19,8 @@
     "nodemon": "^3.1.4",
     "paginate": "^0.2.0",
     "pagination": "^0.4.6",
+    "react-infinite-scroll-component": "^6.1.0",
+    "render": "^0.1.4",
     "socket.io": "^4.7.5",
     "soket.io": "^0.0.1-security"
   }
