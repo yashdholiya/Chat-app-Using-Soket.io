@@ -445,6 +445,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const bcrypt = require("bcrypt");
 const mysql = require("mysql");
+const { log } = require("console");
 
 const app = express();
 const server = http.createServer(app);
@@ -628,6 +629,30 @@ io.on("connection", (socket) => {
   });
 });
 
+// app.get("/messages", (req, res) => {
+//   const { sender, recipient, oldestMessageId } = req.query;
+
+//   let query =
+//     "SELECT * FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)";
+
+//   const params = [sender, recipient, recipient, sender];
+
+//   if (oldestMessageId) {
+//     query += " AND id < ?";
+//     params.push(oldestMessageId);
+//   }
+
+//   query += " ORDER BY id DESC LIMIT 10"; // Load 10 messages at a time
+
+//   connection.query(query, params, (error, results) => {
+//     if (error) {
+//       console.error("Error fetching messages:", error);
+//       res.status(500).send("Error fetching messages");
+//     } else {
+//       res.json(results); // Return the messages in descending order (newest first)
+//     }
+//   });
+// });
 app.get("/messages", (req, res) => {
   const { sender, recipient, oldestMessageId } = req.query;
 
@@ -639,6 +664,8 @@ app.get("/messages", (req, res) => {
   if (oldestMessageId) {
     query += " AND id < ?";
     params.push(oldestMessageId);
+    console.log("last messges id", req.query);
+    console.log("...................................");
   }
 
   query += " ORDER BY id DESC LIMIT 10"; // Load 10 messages at a time
@@ -646,13 +673,12 @@ app.get("/messages", (req, res) => {
   connection.query(query, params, (error, results) => {
     if (error) {
       console.error("Error fetching messages:", error);
-      res.status(500).send("Error fetching messages");
+      res.status(500).json({ error: "Error fetching messages" });
     } else {
       res.json(results); // Return the messages in descending order (newest first)
     }
   });
 });
-
 // Start server
 const PORT = 2123;
 server.listen(PORT, () => {
