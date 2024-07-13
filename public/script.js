@@ -538,7 +538,7 @@ function displayPrivateMessage(messageData, isSender, prepend = false) {
   // Append or prepend message element based on 'prepend' flag
   if (prepend) {
     privateMessages.insertBefore(messageElement, privateMessages.firstChild);
-    console.log("messages....", privateMessages);
+    // console.log("messages....", privateMessages);
   } else {
     privateMessages.appendChild(messageElement);
   }
@@ -591,15 +591,13 @@ function displayFetchedMessages(messages) {
       message: message.message,
       timestamp: new Date(message.created_at),
     };
-    console.log("fach messges..",messages);
+    console.log("fach messges..", messages);
     displayPrivateMessage(messageData, message.sender === username, true); // Pass true to prepend messages
   });
 
   // Adjust scroll position to show latest messages at the bottom
   privateMessages.scrollTop = privateMessages.scrollHeight;
 }
-
-
 
 // // Function to load more messages when scrolling to top
 function loadMoreMessages() {
