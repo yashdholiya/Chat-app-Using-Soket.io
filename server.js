@@ -413,16 +413,41 @@
 //   });
 // });
 
-// // API endpoint to get messages between two users
-// app.get("/messages", (req, res) => {
-//   const { sender, recipient } = req.query;
+// // // API endpoint to get messages between two users
+// // app.get("/messages", (req, res) => {
+// //   const { sender, recipient } = req.query;
 
-//   const query =
-//     "SELECT * FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?) ORDER BY created_at ASC";
+// //   const query =
+// //     "SELECT * FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?) ORDER BY created_at ASC";
+
+// //   connection.query(
+// //     query,
+// //     [sender, recipient, recipient, sender],
+// //     (error, results) => {
+// //       if (error) {
+// //         console.error("Error fetching messages:", error);
+// //         res.status(500).send("Error fetching messages");
+// //       } else {
+// //         res.json(results);
+// //       }
+// //     }
+// //   );
+// // });
+// // API endpoint to get paginated messages between two users
+// app.get("/messages", (req, res) => {
+//   const { sender, recipient, page = 1, limit = 10 } = req.query;
+//   const offset = (page - 1) * limit;
+
+//   const query = `
+//     SELECT * FROM messages
+//     WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+//     ORDER BY created_at ASC
+//     LIMIT ? OFFSET ?
+//   `;
 
 //   connection.query(
 //     query,
-//     [sender, recipient, recipient, sender],
+//     [sender, recipient, recipient, sender, parseInt(limit), parseInt(offset)],
 //     (error, results) => {
 //       if (error) {
 //         console.error("Error fetching messages:", error);
@@ -434,18 +459,16 @@
 //   );
 // });
 
-// // Start server
+// // // Start server
 // const PORT = 2123;
 // server.listen(PORT, () => {
 //   console.log(`Server running at http://localhost:${PORT}`);
 // });
-
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const bcrypt = require("bcrypt");
 const mysql = require("mysql");
-const { log } = require("console");
 
 const app = express();
 const server = http.createServer(app);
@@ -492,6 +515,7 @@ app.post("/login", (req, res) => {
   connection.query(query, [username], (error, results) => {
     if (error) {
       console.error("Error logging in:", error);
+      ``;
       res.status(500).send("Error logging in");
     } else {
       if (results.length > 0) {
@@ -628,59 +652,65 @@ io.on("connection", (socket) => {
     }
   });
 });
-
+// Server-side endpoint to fetch paginated messages
 // app.get("/messages", (req, res) => {
-//   const { sender, recipient, oldestMessageId } = req.query;
+//   const { sender, recipient, page = 1, limit = 10 } = req.query;
+//   const offset = (page - 1) * limit;
 
-//   let query =
-//     "SELECT * FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)";
+//   const query = `
+//     SELECT * FROM messages
+//     WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+//     ORDER BY created_at DESC
+//     LIMIT ? OFFSET ?
+//   `;
 
-//   const params = [sender, recipient, recipient, sender];
-
-//   if (oldestMessageId) {
-//     query += " AND id < ?";
-//     params.push(oldestMessageId);
-//   }
-
-//   query += " ORDER BY id DESC LIMIT 10"; // Load 10 messages at a time
-
-//   connection.query(query, params, (error, results) => {
-//     if (error) {
-//       console.error("Error fetching messages:", error);
-//       res.status(500).send("Error fetching messages");
-//     } else {
-//       res.json(results); // Return the messages in descending order (newest first)
+//   connection.query(
+//     query,
+//     [sender, recipient, recipient, sender, parseInt(limit), parseInt(offset)],
+//     (error, results) => {
+//       if (error) {
+//         console.error("Error fetching messages:", error);
+//         res.status(500).send("Error fetching messages");
+//       } else {
+//         // Reverse the order of messages to display newest at the bottom
+//         const reversedMessages = results.reverse();
+//         res.json(reversedMessages);
+//         console.log("mesages..", reversedMessages);
+//       }
 //     }
-//   });
+//   );
 // });
+// API endpoint to get paginated messages between two users
 app.get("/messages", (req, res) => {
-  const { sender, recipient, oldestMessageId } = req.query;
+  const { sender, recipient, page = 1, limit = 10 } = req.query;
+  const offset = (page - 1) * limit;
 
-  let query =
-    "SELECT * FROM messages WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)";
+  const query = `
+    SELECT * FROM messages
+    WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+    ORDER BY created_at ASC
+    LIMIT ? OFFSET ?
+  `;
 
-  const params = [sender, recipient, recipient, sender];
+  connection.query(
+    query,
+    [sender, recipient, recipient, sender, parseInt(limit), parseInt(offset)],
+    (error, results) => {
+      if (error) {
+        console.error("Error fetching messages:", error);
+        res.status(500).send("Error fetching messages");
+      } else {
+        res.json(results);
 
-  if (oldestMessageId) {
-    query += " AND id < ?";
-    params.push(oldestMessageId);
-    console.log("last messges id", req.query);
-    console.log("...................................");
-  }
-
-  query += " ORDER BY id DESC LIMIT 10"; // Load 10 messages at a time
-
-  connection.query(query, params, (error, results) => {
-    if (error) {
-      console.error("Error fetching messages:", error);
-      res.status(500).json({ error: "Error fetching messages" });
-    } else {
-      res.json(results); // Return the messages in descending order (newest first)
+        // console.log("hello ..", results);
+      }
     }
-  });
+  );
 });
+
 // Start server
 const PORT = 2123;
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
+

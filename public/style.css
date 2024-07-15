@@ -135,6 +135,14 @@ button:hover {
   margin-bottom: 10px;
 }
 
+.loader {
+  display: none;
+  text-align: center;
+}
+.loader.show {
+  display: block;
+}
+
 /* 
 body {
   font-family: Arial, sans-serif;
