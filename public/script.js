@@ -757,7 +757,7 @@ function displayPrivateMessage(messageData, isSender) {
   const privateMessages = document.getElementById("privateMessages");
   const messageElement = document.createElement("div");
   messageElement.className = `message ${isSender ? "sent" : "received"}`;
-  const timestamp = new Date(messageData.timestamp).toLocaleTimeString();
+  const timestamp = new Date(messageData.timestamp).toLocaleTimeString() + 4;
   messageElement.innerHTML = `
     <div class="message-user">${messageData.user}</div>
     <div class="message-content">${messageData.message}</div>
@@ -825,11 +825,13 @@ function hideLoader() {
   document.querySelector(".loader").classList.remove("show");
 }
 
+// Client-side: Listening for private messages
 socket.on("private-message", (messageData) => {
   if (currentRecipient === messageData.user || username === messageData.user) {
-    displayPrivateMessage(messageData, false);
+    displayPrivateMessage(messageData, false); // Display the received message
   }
 });
+
 // Event listener for scrolling in private messages
 document.getElementById("privateMessages").addEventListener("scroll", () => {
   const { scrollTop, clientHeight } =

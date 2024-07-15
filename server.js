@@ -654,16 +654,46 @@ io.on("connection", (socket) => {
   });
 });
 
+// // API endpoint to get paginated messages between two users
+// app.get("/messages", (req, res) => {
+//   const { sender, recipient, page = 1, limit = 10 } = req.query;
+//   const offset = (page - 1) * limit;
+
+//   const query = `
+//     SELECT * FROM messages
+//     WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+//     ORDER BY created_at desc
+//     LIMIT ? OFFSET ?
+//   `;
+
+//   connection.query(
+//     query,
+//     [sender, recipient, recipient, sender, parseInt(limit), parseInt(offset)],
+//     (error, results) => {
+//       if (error) {
+//         console.error("Error fetching messages:", error);
+//         res.status(500).send("Error fetching messages");
+//       } else {
+//         res.json(results);
+
+//         // console.log("hello ..", results);
+//       }
+//     }
+//   );
+// });
 // API endpoint to get paginated messages between two users
 app.get("/messages", (req, res) => {
   const { sender, recipient, page = 1, limit = 10 } = req.query;
   const offset = (page - 1) * limit;
 
   const query = `
-    SELECT * FROM messages
-    WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
-    ORDER BY created_at desc
-    LIMIT ? OFFSET ?
+    SELECT * FROM (
+      SELECT * FROM messages
+      WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    ) AS message_sub
+    ORDER BY created_at ASC
   `;
 
   connection.query(
@@ -674,9 +704,9 @@ app.get("/messages", (req, res) => {
         console.error("Error fetching messages:", error);
         res.status(500).send("Error fetching messages");
       } else {
-        res.json(results);
-
-        // console.log("hello ..", results);
+        // Reverse the order of results to ensure messages are displayed from bottom to top
+        const reversedResults = results.reverse();
+        res.json(reversedResults);
       }
     }
   );
