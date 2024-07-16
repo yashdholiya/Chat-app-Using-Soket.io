@@ -632,14 +632,16 @@
 // });
 // // // Initial setup: Show registration/login view
 // showView("registerContainer");
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const socket = io();
 let userId = "";
 let username = "";
 let currentRecipient = null;
-let currentPage = 1;
-const limit = 10;
+let privateMessagePage = 1; // Initial page for private messages
+const privateMessageLimit = 10; // Messages per page
 
+// Function to switch between registration, login, chat, and private chat views
 function showView(viewId) {
   hideAllViews();
   const viewElement = document.getElementById(viewId);
@@ -650,6 +652,7 @@ function showView(viewId) {
   }
 }
 
+// Helper function to hide all views
 function hideAllViews() {
   document.getElementById("registerContainer").style.display = "none";
   document.getElementById("loginContainer").style.display = "none";
@@ -657,6 +660,7 @@ function hideAllViews() {
   document.getElementById("privateChatContainer").style.display = "none";
 }
 
+// Example check for form submission
 document.getElementById("registerForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const regUserId = document.getElementById("regUserId").value;
@@ -672,6 +676,7 @@ document.getElementById("registerForm").addEventListener("submit", (event) => {
     return;
   }
 
+  // Proceed with form submission
   fetch("/register", {
     method: "POST",
     headers: {
@@ -693,6 +698,7 @@ document.getElementById("registerForm").addEventListener("submit", (event) => {
     });
 });
 
+// Event listener for login form submission
 document.getElementById("loginForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const loginUsername = document.getElementById("loginUsername").value;
@@ -723,6 +729,101 @@ document.getElementById("loginForm").addEventListener("submit", (event) => {
     });
 });
 
+// // Event listener for sending private messages
+// document
+//   .getElementById("privateMessageForm")
+//   .addEventListener("submit", (event) => {
+//     event.preventDefault();
+//     const messageInput = document.getElementById("privateMessageInput").value;
+//     if (messageInput.trim() === "") {
+//       return;
+//     }
+//     sendPrivateMessage(currentRecipient, messageInput);
+//     document.getElementById("privateMessageInput").value = "";
+//   });
+
+// // Event listener for back to chat button in private chat view
+// document.getElementById("backToChatBtn").addEventListener("click", () => {
+//   showView("chatContainer");
+//   currentRecipient = null;
+//   document.getElementById("privateMessages").innerHTML = "";
+//   privateMessagePage = 1; // Reset pagination to first page
+// });
+
+// // Function to send a private message to another user
+// function sendPrivateMessage(to, message) {
+//   const messageData = {
+//     user: username,
+//     message,
+//     timestamp: new Date().toISOString(),
+//   };
+//   socket.emit("private-message", { to, messageData });
+//   displayPrivateMessage(messageData, true);
+// }
+
+// function displayPrivateMessage(messageData, isSender) {
+//   const privateMessages = document.getElementById("privateMessages");
+//   const messageElement = document.createElement("div");
+//   messageElement.className = `message ${isSender ? "sent" : "received"}`;
+//   const timestamp = new Date(messageData.timestamp).toLocaleTimeString();
+//   messageElement.innerHTML = `
+//     <div class="message-user">${messageData.user}</div>
+//     <div class="message-content">${messageData.message}</div>
+//     <div class="message-timestamp">${timestamp}</div>
+//   `;
+//   privateMessages.appendChild(messageElement);
+//   privateMessages.scrollTop = privateMessages.scrollHeight;
+// }
+
+// // Socket event to update online users list
+// socket.on("update-users", (users) => {
+//   const onlineUsersList = document.getElementById("onlineUsersList");
+//   onlineUsersList.innerHTML = "";
+//   users.forEach((user) => {
+//     const userElement = document.createElement("li");
+//     userElement.textContent = `${user.username} (${user.status})`;
+//     userElement.addEventListener("click", () => {
+//       if (user.userid !== userId) {
+//         currentRecipient = user.username;
+//         document.getElementById(
+//           "privateChatWith"
+//         ).textContent = `Chat with ${user.username}`;
+//         fetchPrivateMessages(user.username);
+//         showView("privateChatContainer");
+//       }
+//     });
+//     onlineUsersList.appendChild(userElement);
+//   });
+// });
+
+// // Function to fetch and display private messages between the user and the recipient
+// function fetchPrivateMessages(recipient) {
+//   fetch(
+//     `http://localhost:2123/messages?sender=${username}&recipient=${recipient}&page=${privateMessagePage}&limit=${privateMessageLimit}`
+//   )
+//     .then((response) => response.json())
+//     .then((messages) => {
+//       messages.forEach((message) => {
+//         const messageData = {
+//           user: message.sender,
+//           message: message.message,
+//           timestamp: new Date(message.created_at), // Ensure this is a Date object
+//         };
+//         displayPrivateMessage(messageData, message.sender === username);
+//       });
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching private messages:", error);
+//     });
+// }
+
+// // Socket event to receive private message
+// socket.on("private-message", (messageData) => {
+//   if (currentRecipient === messageData.user || username === messageData.user) {
+//     displayPrivateMessage(messageData, false);
+//   }
+// });
+// Event listener for sending private messages
 document
   .getElementById("privateMessageForm")
   .addEventListener("submit", (event) => {
@@ -735,13 +836,15 @@ document
     document.getElementById("privateMessageInput").value = "";
   });
 
+// Event listener for back to chat button in private chat view
 document.getElementById("backToChatBtn").addEventListener("click", () => {
   showView("chatContainer");
   currentRecipient = null;
   document.getElementById("privateMessages").innerHTML = "";
-  currentPage = 1;
+  privateMessagePage = 1; // Reset pagination to first page
 });
 
+// Function to send a private message to another user
 function sendPrivateMessage(to, message) {
   const messageData = {
     user: username,
@@ -752,21 +855,50 @@ function sendPrivateMessage(to, message) {
   displayPrivateMessage(messageData, true);
 }
 
-// Function to display private messages in the UI
+// Function to display a private message
 function displayPrivateMessage(messageData, isSender) {
   const privateMessages = document.getElementById("privateMessages");
   const messageElement = document.createElement("div");
   messageElement.className = `message ${isSender ? "sent" : "received"}`;
-  const timestamp = new Date(messageData.timestamp).toLocaleTimeString() + 4;
+  const timestamp = new Date(messageData.timestamp).toLocaleTimeString();
   messageElement.innerHTML = `
     <div class="message-user">${messageData.user}</div>
     <div class="message-content">${messageData.message}</div>
     <div class="message-timestamp">${timestamp}</div>
   `;
-  privateMessages.prepend(messageElement);
+  privateMessages.appendChild(messageElement);
   privateMessages.scrollTop = privateMessages.scrollHeight;
 }
 
+// Function to fetch and display private messages between the user and the recipient
+function fetchPrivateMessages(recipient) {
+  fetch(
+    `/messages?sender=${username}&recipient=${recipient}&page=${privateMessagePage}&limit=${privateMessageLimit}`
+  )
+    .then((response) => response.json())
+    .then((messages) => {
+      messages.messages.forEach((message) => {
+        const messageData = {
+          user: message.sender,
+          message: message.message,
+          timestamp: new Date(message.created_at), // Ensure this is a Date object
+        };
+        displayPrivateMessage(messageData, message.sender === username);
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching private messages:", error);
+    });
+}
+
+// Socket event to receive private message
+socket.on("private-message", (messageData) => {
+  if (currentRecipient === messageData.user || username === messageData.user) {
+    displayPrivateMessage(messageData, false);
+  }
+});
+
+// Socket event to update online users list
 socket.on("update-users", (users) => {
   const onlineUsersList = document.getElementById("onlineUsersList");
   onlineUsersList.innerHTML = "";
@@ -779,66 +911,33 @@ socket.on("update-users", (users) => {
         document.getElementById(
           "privateChatWith"
         ).textContent = `Chat with ${user.username}`;
-        currentPage = 1;
-        document.getElementById("privateMessages").innerHTML = "";
         fetchPrivateMessages(user.username);
-
-        +showView("privateChatContainer");
+        showView("privateChatContainer");
       }
     });
     onlineUsersList.appendChild(userElement);
   });
 });
 
-// Function to fetch and display private messages
-function fetchPrivateMessages(recipient) {
-  showLoader();
-  fetch(
-    `/messages?sender=${username}&recipient=${recipient}&page=${currentPage}&limit=${limit}`
-  )
-    .then((response) => response.json())
-    .then((messages) => {
-      if (messages.length > 0) {
-        messages.forEach((message) => {
-          const messageData = {
-            user: message.sender,
-            message: message.message,
-            timestamp: new Date(message.created_at).toISOString(),
-          };
-          displayPrivateMessage(messageData, message.sender === username);
-        });
-        currentPage++;
-      }
-      hideLoader();
-    })
-    .catch((error) => {
-      console.error("Error fetching private messages:", error);
-      hideLoader();
-    });
-}
+// Socket event to handle user status change
+socket.on("user-status-change", ({ username, status, disconnectTime }) => {
+  const statusChangeMessage = `${username} is now ${status}`;
+  console.log(statusChangeMessage);
 
-function showLoader() {
-  document.querySelector(".loader").classList.add("show");
-}
-
-function hideLoader() {
-  document.querySelector(".loader").classList.remove("show");
-}
-
-// Client-side: Listening for private messages
-socket.on("private-message", (messageData) => {
-  if (currentRecipient === messageData.user || username === messageData.user) {
-    displayPrivateMessage(messageData, false); // Display the received message
-  }
+  // Update UI to reflect user status change (optional)
 });
 
-// Event listener for scrolling in private messages
-document.getElementById("privateMessages").addEventListener("scroll", () => {
-  const { scrollTop, clientHeight } =
-    document.getElementById("privateMessages");
-  if (scrollTop === 0 && currentRecipient) {
-    fetchPrivateMessages(currentRecipient);
-  }
-});
-// // Initial setup: Show registration/login view
+// Event listener for scrolling in the private messages container
+document
+  .getElementById("privateMessages")
+  .addEventListener("scroll", (event) => {
+    const privateMessages = document.getElementById("privateMessages");
+    if (privateMessages.scrollTop === 0) {
+      // Load more messages
+      privateMessagePage++;
+      fetchPrivateMessages(currentRecipient);
+    }
+  });
+
+// Initial setup: Show registration/login view
 showView("registerContainer");
