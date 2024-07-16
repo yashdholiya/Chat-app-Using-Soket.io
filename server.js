@@ -666,8 +666,6 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -798,7 +796,7 @@ io.on("connection", (socket) => {
       console.log("messages...", messageData);
 
       // Add a timestamp to the message data
-      messageData.timestamp = new Date().toISOString();
+      messageData.timestamp = new Date().toLocaleTimeString() + 6;
 
       // Save message to the database with timestamp
       const query =
@@ -865,7 +863,7 @@ app.get("/messages", (req, res) => {
   const countQuery = `
     SELECT COUNT(*) AS totalCount
     FROM messages
-    WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+    WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?) 
   `;
 
   // Query to get the messages with pagination
@@ -873,10 +871,18 @@ app.get("/messages", (req, res) => {
     SELECT *
     FROM messages
     WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
-    ORDER BY created_at ASC
+    ORDER BY created_at desc
     LIMIT ? OFFSET ?
   `;
-
+  // const messagesQuery = `
+  //     SELECT * FROM (
+  //       SELECT * FROM messages
+  //       WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
+  //       ORDER BY created_at DESC
+  //       LIMIT ? OFFSET ?
+  //     ) AS message_sub
+  //     ORDER BY created_at ASC
+  //   `;
   // Execute the count query
   connection.query(
     countQuery,
@@ -889,6 +895,7 @@ app.get("/messages", (req, res) => {
       }
 
       const totalCount = countResults[0].totalCount;
+      console.log("hello total count ", totalCount);
 
       // Execute the messages query
       connection.query(
@@ -907,9 +914,12 @@ app.get("/messages", (req, res) => {
             res.status(500).send("Error fetching messages");
             return;
           }
+          console.log("hello .....", messagesResults);
+          console.log("ofset......................", offset);
 
           // Calculate the total pages
           const totalPages = Math.ceil(totalCount / limit);
+          // console.log("page ...",totalPages);
 
           // Send the messages and pagination info
           res.json({
@@ -920,6 +930,7 @@ app.get("/messages", (req, res) => {
               totalCount: totalCount,
             },
           });
+          // console.log("hello .....", messagesResults);
         }
       );
     }
