@@ -21,6 +21,17 @@ body {
   margin: 20px;
 }
 
+#groupChatContainer {
+  display: none;
+  max-width: 600px;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin: 20px;
+}
+
 #registerContainer h2,
 #loginContainer h2,
 #chatContainer h2,
@@ -106,11 +117,24 @@ button:hover {
   text-align: right;
 }
 
+#groupMessages .sent {
+  text-align: right;
+}
+
 #privateMessages .received {
   text-align: left;
 }
 
+#groupMessages.received {
+  text-align: left;
+}
+
 #privateMessages {
+  height: 600px;
+  overflow: auto;
+}
+
+#groupMessages {
   height: 600px;
   overflow: auto;
 }
@@ -131,7 +155,19 @@ button:hover {
   list-style-type: none;
 }
 
+#groupMessages {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  list-style-type: none;
+}
+
 #privateMessagesList li {
+  margin-bottom: 10px;
+}
+
+#groupMessages li {
   margin-bottom: 10px;
 }
 
@@ -139,7 +175,7 @@ button:hover {
   display: none;
   text-align: center;
 }
+
 .loader.show {
   display: block;
 }
-

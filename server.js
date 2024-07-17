@@ -500,6 +500,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const bcrypt = require("bcrypt");
 const mysql = require("mysql");
+const { log } = require("console");
 
 const app = express();
 const server = http.createServer(app);
@@ -584,6 +585,7 @@ app.get("/users", (req, res) => {
       res.status(500).send("Error fetching users");
     } else {
       res.json(results);
+      console.log("....", results);
     }
   });
 });
@@ -614,7 +616,7 @@ app.get("/group-names", (req, res) => {
       console.error("Error fetching groups:", error);
       res.status(500).send({ message: "Error fetching groups" });
     } else {
-      res.json(results); console.log("grup name ...",results);
+      res.json(results);
     }
   });
 });
@@ -633,7 +635,52 @@ app.post("/add-to-group", (req, res) => {
     }
   });
 });
-// Fetch group messages endpoint with pagination
+// // Fetch group messages endpoint with pagination
+// app.get("/group-messages", (req, res) => {
+//   const { groupid, page = 1, limit = 10 } = req.query;
+//   const offset = (page - 1) * limit;
+
+//   const countQuery =
+//     "SELECT COUNT(*) AS totalCount FROM group_messages WHERE groupid = ?";
+//   const messagesQuery = `
+//     SELECT * FROM group_messages
+//     WHERE groupid = ?
+//     ORDER BY created_at DESC
+//     LIMIT ? OFFSET ?`;
+
+//   connection.query(countQuery, [groupid], (error, countResults) => {
+//     if (error) {
+//       console.error("Error fetching group message count:", error);
+//       res.status(500).send({ message: "Error fetching group messages" });
+//       return;
+//     }
+
+//     const totalCount = countResults[0].totalCount;
+
+//     connection.query(
+//       messagesQuery,
+//       [groupid, parseInt(limit), parseInt(offset)],
+//       (error, messagesResults) => {
+//         if (error) {
+//           console.error("Error fetching group messages:", error);
+//           res.status(500).send({ message: "Error fetching group messages" });
+//           return;
+//         }
+
+//         const totalPages = Math.ceil(totalCount / limit);
+
+//         res.json({
+//           messages: messagesResults,
+//           pagination: {
+//             currentPage: parseInt(page),
+//             totalPages: totalPages,
+//             totalCount: totalCount,
+//           },
+//         });
+//       }
+//     );
+//   });
+// });
 app.get("/group-messages", (req, res) => {
   const { groupid, page = 1, limit = 10 } = req.query;
   const offset = (page - 1) * limit;
@@ -734,6 +781,24 @@ io.on("connection", (socket) => {
       );
     }
   });
+  // // Handle group message
+  // socket.on("group-message", ({ groupid, messageData }) => {
+  //   console.log("grup id .....", groupid);
+  //   const query =
+  //     "INSERT INTO group_messages (groupid, sender, message) VALUES (?, ?, ?)";
+  //   connection.query(
+  //     query,
+  //     [groupid, messageData.user, messageData.message],
+  //     (error, results) => {
+  //       if (error) {
+  //         console.error("Error saving group message:", error);
+  //       } else {
+  //         io.emit(`group-message-${groupid}`, messageData);
+  //         console.log("grup .... ", groupid);
+  //       }
+  //     }
+  //   );
+  // });
   // Handle group message
   socket.on("group-message", ({ groupid, messageData }) => {
     const query =
@@ -744,8 +809,11 @@ io.on("connection", (socket) => {
       (error, results) => {
         if (error) {
           console.error("Error saving group message:", error);
+          // Handle error appropriately
         } else {
           io.emit(`group-message-${groupid}`, messageData);
+          console.log("Group message saved successfully");
+          // Optionally emit a success message
         }
       }
     );

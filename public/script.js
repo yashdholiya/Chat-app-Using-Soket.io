@@ -902,6 +902,246 @@ document
 //                                                                    grup chat                                                                  //
 // Group chat functionality
 
+// let currentGroupId = null;
+// let groupMessagePage = 1;
+// const groupMessageLimit = 10;
+
+// // Create group button event listener
+// document.getElementById("createGroupBtn").addEventListener("click", () => {
+//   const groupName = prompt("Enter group name:");
+//   if (groupName) {
+//     fetch("/create-group", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ groupname: groupName }),
+//     })
+//       .then((response) => response.text())
+//       .then((data) => {
+//         alert(data);
+//         // fetchGroups(); // Refresh the group list
+//       })
+//       .catch((error) => {
+//         console.error("Error creating group:", error);
+//         alert("Error creating group");
+//       });
+//   }
+// });
+// function displayGroupNames() {
+//   fetch("/group-names")
+//     .then((response) => response.json())
+//     .then((groupNames) => {
+//       const groupList = document.getElementById("groupList");
+//       groupList.innerHTML = "";
+//       groupNames.forEach((group) => {
+//         const groupItem = document.createElement("li");
+//         groupItem.textContent = `group ${group.groupname}`;
+//         groupItem.dataset.groupid = group.groupid; // Add group ID for reference
+//         groupList.appendChild(groupItem);
+//         // console.log("........", group.groupid);
+
+//         groupItem.addEventListener("click", () => {
+//           currentGroupId = group.groupid;
+//           // console.log("...........", currentGroupId);
+//           showView("groupChatContainer");
+//         });
+//       });
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching group names:", error);
+//     });
+// }
+
+// displayGroupNames();
+
+// // Fetch all users and display in a list
+// document.getElementById("addUserToGroupBtn").addEventListener("click", () => {
+//   fetch("/users")
+//     .then((response) => response.json())
+//     .then((allUsers) => {
+//       const userListContainer = document.createElement("div");
+//       userListContainer.id = "userListContainer";
+//       userListContainer.classList.add("user-list-container");
+//       document.body.appendChild(userListContainer); // Append to body or any appropriate container
+
+//       allUsers.forEach((user) => {
+//         const userItem = document.createElement("div");
+//         userItem.textContent = `User ID: ${user.userid}, Username: ${user.username}`;
+//         userItem.dataset.userid = user.userid;
+//         userItem.classList.add("user-item"); // Add a class for styling
+//         userListContainer.appendChild(userItem);
+
+//         // Add click event listener to each user item
+//         userItem.addEventListener("click", () => {
+//           const userId = user.userid;
+//           addUserToGroup(userId);
+//         });
+//       });
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching all users:", error);
+//       alert("Error fetching all users");
+//     });
+// });
+
+// // // Function to add user to the group
+// // function addUserToGroup(userId) {
+// //   if (currentGroupId) {
+// //     fetch("/add-to-group", {
+// //       method: "POST",
+// //       headers: {
+// //         "Content-Type": "application/json",
+// //       },
+// //       body: JSON.stringify({ groupid: currentGroupId, userid: userId }),
+// //     })
+// //       .then((response) => response.text())
+// //       .then((data) => {
+// //         alert(data);
+// //       })
+// //       .catch((error) => {
+// //         console.error("Error adding user to group:", error);
+// //         alert("Error adding user to group");
+// //       });
+// //   } else {
+// //     console.error("No current group selected");
+// //     alert("No current group selected");
+// //   }
+// // }
+// // Function to add user to the group
+// function addUserToGroup(userId) {
+//   if (currentGroupId) {
+//     fetch("/add-to-group", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ groupid: currentGroupId, userid: userId }),
+//     })
+//       .then((response) => response.text())
+//       .then((data) => {
+//         alert(data);
+
+//         // Update group members list
+//         fetch(`/group-members?groupid=${currentGroupId}`)
+//           .then((response) => response.json())
+//           .then((members) => {
+//             updateGroupMembers(members);
+//           })
+//           .catch((error) => {
+//             console.error("Error fetching group members:", error);
+//           });
+
+//         // Optionally, fetch or update group messages here if needed
+//       })
+//       .catch((error) => {
+//         console.error("Error adding user to group:", error);
+//         alert("Error adding user to group");
+//       });
+//   } else {
+//     console.error("No current group selected");
+//     alert("No current group selected");
+//   }
+// }
+
+// // Group message form submission event listener
+// document
+//   .getElementById("groupMessageForm")
+//   .addEventListener("submit", (event) => {
+//     event.preventDefault();
+//     const messageInput = document.getElementById("groupMessageInput").value;
+//     if (messageInput.trim() === "") {
+//       return;
+//     }
+//     sendGroupMessage(messageInput); // Pass messageInput here
+//     document.getElementById("groupMessageInput").value = "";
+//   });
+
+// // Function to send a group message
+// function sendGroupMessage(message) {
+//   const messageData = {
+//     user: username,
+//     message,
+//     timestamp: new Date().toISOString(),
+//   };
+//   if (currentGroupId) {
+//     socket.emit("group-message", { groupid: currentGroupId, messageData });
+//     displayGroupMessage(messageData, true);
+//   } else {
+//     console.error("No current group selected");
+//   }
+// }
+
+// // Function to display a group message
+// function displayGroupMessage(messageData, isSender) {
+//   const groupMessages = document.getElementById("groupMessages");
+//   const messageElement = createMessageElement(messageData, isSender);
+//   groupMessages.appendChild(messageElement);
+//   groupMessages.scrollTop = groupMessages.scrollHeight;
+// }
+
+// // Function to fetch group messages
+// function fetchGroupMessages(groupId, isInitialLoad = false) {
+//   fetch(
+//     `/group-messages?groupid=${groupId}&page=${groupMessagePage}&limit=${groupMessageLimit}`
+//   )
+//     .then((response) => response.json())
+//     .then((messages) => {
+//       const groupMessages = document.getElementById("groupMessages");
+//       const scrollPosition =
+//         groupMessages.scrollHeight - groupMessages.scrollTop;
+
+//       messages.messages.forEach((message) => {
+//         const messageData = {
+//           user: message.sender,
+//           message: message.message,
+//           timestamp: new Date(message.created_at),
+//         };
+
+//         if (isInitialLoad) {
+//           displayGroupMessage(messageData, message.sender === username);
+//         } else {
+//           const messageElement = createMessageElement(
+//             messageData,
+//             message.sender === username
+//           );
+//           groupMessages.insertBefore(messageElement, groupMessages.firstChild);
+//         }
+//       });
+
+//       if (!isInitialLoad) {
+//         groupMessages.scrollTop = groupMessages.scrollHeight - scrollPosition;
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching group messages:", error);
+//     });
+// }
+
+// // Socket event to receive group message
+// socket.on("group-message", (messageData) => {
+//   if (currentGroupId === messageData.groupid) {
+//     displayGroupMessage(messageData, false);
+//   }
+// });
+
+// // Scroll event listener for loading more group messages
+// document.getElementById("groupMessages").addEventListener("scroll", (event) => {
+//   const groupMessages = document.getElementById("groupMessages");
+//   if (groupMessages.scrollTop === 0) {
+//     // Load more messages when scrolled to the top
+//     groupMessagePage++;
+//     fetchGroupMessages(currentGroupId);
+//   }
+// });
+// document.getElementById("backToChatBtn").addEventListener("click", () => {
+//   showView("chatContainer");
+// });
+
+// // // Initial setup: Show registration/login view
+// showView("registerContainer");
+// Global variables
+
 let currentGroupId = null;
 let groupMessagePage = 1;
 const groupMessageLimit = 10;
@@ -920,7 +1160,8 @@ document.getElementById("createGroupBtn").addEventListener("click", () => {
       .then((response) => response.text())
       .then((data) => {
         alert(data);
-        // fetchGroups(); // Refresh the group list
+        // Refresh group list
+        displayGroupNames();
       })
       .catch((error) => {
         console.error("Error creating group:", error);
@@ -928,31 +1169,86 @@ document.getElementById("createGroupBtn").addEventListener("click", () => {
       });
   }
 });
-// Function to fetch and display group names
+
+// Function to display group names
 function displayGroupNames() {
-  // Make an API call to your database to get group names
   fetch("/group-names")
     .then((response) => response.json())
     .then((groupNames) => {
       const groupList = document.getElementById("groupList");
       groupList.innerHTML = "";
-      groupNames.forEach((groupName) => {
+      groupNames.forEach((group) => {
         const groupItem = document.createElement("li");
-        groupItem.textContent = groupName;
+        groupItem.textContent = `Group: ${group.groupname}`;
+        groupItem.dataset.groupid = group.groupid; // Store group ID
         groupList.appendChild(groupItem);
-        console.log("grup name ...", groupName);
-        console.log("grup name .....................", groupItem);
+
+        groupItem.addEventListener("click", () => {
+          currentGroupId = group.groupid;
+          showView("groupChatContainer");
+          fetchGroupMessages(currentGroupId, true); // Fetch group messages
+          fetchGroupMembers(currentGroupId); // Fetch group members
+        });
       });
+    })
+    .catch((error) => {
+      console.error("Error fetching group names:", error);
+    });
+}
+displayGroupNames();
+
+// Function to fetch group members
+function fetchGroupMembers(groupId) {
+  fetch(`/group-members?groupid=${groupId}`)
+    .then((response) => response.json())
+    .then((members) => {
+      updateGroupMembersUI(members);
+    })
+    .catch((error) => {
+      console.error("Error fetching group members:", error);
     });
 }
 
-// Call the function to initially display group names
-displayGroupNames();
+// Update UI with group members
+function updateGroupMembersUI(members) {
+  const groupChatWith = document.getElementById("groupChatWith");
+  groupChatWith.textContent = `Group Chat with: ${members
+    .map((member) => member.username)
+    .join(", ")}`;
+}
 
-// Add user to group button event listener
+// Event listener to add user to group
 document.getElementById("addUserToGroupBtn").addEventListener("click", () => {
-  const userId = prompt("Enter user ID to add to group:");
-  if (userId) {
+  fetch("/users")
+    .then((response) => response.json())
+    .then((allUsers) => {
+      const userListContainer = document.createElement("div");
+      userListContainer.id = "userListContainer";
+      userListContainer.classList.add("user-list-container");
+      document.body.appendChild(userListContainer);
+
+      allUsers.forEach((user) => {
+        const userItem = document.createElement("div");
+        userItem.textContent = `User ID: ${user.userid}, Username: ${user.username}`;
+        userItem.dataset.userid = user.userid;
+        userItem.classList.add("user-item");
+        userListContainer.appendChild(userItem);
+
+        userItem.addEventListener("click", () => {
+          const userId = user.userid;
+          addUserToGroup(userId);
+        });
+      });
+    })
+    .catch((error) => {
+      console.error("Error fetching all users:", error);
+      alert("Error fetching all users");
+    });
+});
+
+// Function to add user to group
+function addUserToGroup(userId) {
+  if (currentGroupId) {
     fetch("/add-to-group", {
       method: "POST",
       headers: {
@@ -963,15 +1259,21 @@ document.getElementById("addUserToGroupBtn").addEventListener("click", () => {
       .then((response) => response.text())
       .then((data) => {
         alert(data);
+
+        // Refresh group members list and update UI
+        fetchGroupMembers(currentGroupId);
       })
       .catch((error) => {
         console.error("Error adding user to group:", error);
         alert("Error adding user to group");
       });
+  } else {
+    console.error("No current group selected");
+    alert("No current group selected");
   }
-});
+}
 
-// Group message form submission event listener
+// Function to send a group message
 document
   .getElementById("groupMessageForm")
   .addEventListener("submit", (event) => {
@@ -980,30 +1282,40 @@ document
     if (messageInput.trim() === "") {
       return;
     }
-    sendGroupMessage(currentGroupId, messageInput);
+    sendGroupMessage(messageInput);
     document.getElementById("groupMessageInput").value = "";
   });
 
-// Function to send a group message
-function sendGroupMessage(groupId, message) {
+// Function to send group message to server
+function sendGroupMessage(message) {
   const messageData = {
     user: username,
     message,
     timestamp: new Date().toISOString(),
   };
-  socket.emit("group-message", { groupid: groupId, messageData });
-  displayGroupMessage(messageData, true);
+  if (currentGroupId) {
+    socket.emit("group-message", { groupid: currentGroupId, messageData });
+    displayGroupMessage(messageData, true); // Display own message immediately
+  } else {
+    console.error("No current group selected");
+  }
 }
 
+// // Function to display group message in UI
+// function displayGroupMessage(messageData, isSender) {
+//   const groupMessages = document.getElementById("groupMessages");
+//   const messageElement = createMessageElement(messageData, isSender);
+//   groupMessages.appendChild(messageElement);
+//   groupMessages.scrollTop = groupMessages.scrollHeight;
+// }
 // Function to display a group message
 function displayGroupMessage(messageData, isSender) {
   const groupMessages = document.getElementById("groupMessages");
   const messageElement = createMessageElement(messageData, isSender);
   groupMessages.appendChild(messageElement);
-  groupMessages.scrollTop = groupMessages.scrollHeight;
 }
 
-// Function to fetch group messages
+// Function to fetch group messages from server
 function fetchGroupMessages(groupId, isInitialLoad = false) {
   fetch(
     `/group-messages?groupid=${groupId}&page=${groupMessagePage}&limit=${groupMessageLimit}`
@@ -1012,7 +1324,8 @@ function fetchGroupMessages(groupId, isInitialLoad = false) {
     .then((messages) => {
       const groupMessages = document.getElementById("groupMessages");
       const scrollPosition =
-        groupMessages.scrollHeight - groupMessages.scrollTop;
+        // groupMessages.scrollHeight - groupMessages.scrollHeight;
+        (groupMessages.scrollTop = groupMessages.scrollHeight);
 
       messages.messages.forEach((message) => {
         const messageData = {
@@ -1041,6 +1354,12 @@ function fetchGroupMessages(groupId, isInitialLoad = false) {
     });
 }
 
+// // Socket event to receive group messages
+// socket.on("group-message", (messageData) => {
+//   if (currentGroupId === messageData.groupid) {
+//     displayGroupMessage(messageData, false); // Display received message in UI
+//   }
+// });
 // Socket event to receive group message
 socket.on("group-message", (messageData) => {
   if (currentGroupId === messageData.groupid) {
@@ -1048,14 +1367,19 @@ socket.on("group-message", (messageData) => {
   }
 });
 
-// Scroll event listener for loading more group messages
+// Scroll event listener to load more group messages
 document.getElementById("groupMessages").addEventListener("scroll", (event) => {
   const groupMessages = document.getElementById("groupMessages");
   if (groupMessages.scrollTop === 0) {
-    // Load more messages when scrolled to the top
     groupMessagePage++;
     fetchGroupMessages(currentGroupId);
   }
 });
-// // Initial setup: Show registration/login view
+
+// Back to main chat button event listener
+document.getElementById("backToChatBtn").addEventListener("click", () => {
+  showView("chatContainer");
+});
+
+// Initial setup: Show registration/login view
 showView("registerContainer");
