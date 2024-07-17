@@ -344,10 +344,8 @@
 //       (user) => user.username === to
 //     );
 //     if (recipient) {
-//       console.log("messages...", messageData);
-
 //       // Add a timestamp to the message data
-//       messageData.timestamp = new Date().toLocaleTimeString() + 6;
+//       messageData.timestamp = new Date().toISOString();
 
 //       // Save message to the database with timestamp
 //       const query =
@@ -359,6 +357,7 @@
 //           if (error) {
 //             console.error("Error saving message:", error);
 //           } else {
+//             // Emit the message data along with timestamp to recipient
 //             io.to(recipient.socketId).emit("private-message", messageData);
 //           }
 //         }
@@ -368,39 +367,43 @@
 
 //   // Handle disconnect event
 //   socket.on("disconnect", () => {
-//     let userId = null;
-//     for (const id in onlineUsers) {
-//       if (onlineUsers[id].socketId === socket.id) {
-//         userId = id;
+//     // Find the disconnected user by socketId
+//     const disconnectedUser = Object.values(onlineUsers).find(
+//       (user) => user.socketId === socket.id
+//     );
 
-//         // Update last seen time and status in the database
-//         const disconnectTime = new Date();
-//         const updateQuery =
-//           "UPDATE users SET status = 'offline', last_seen = ? WHERE userid = ?";
-//         connection.query(
-//           updateQuery,
-//           [disconnectTime, userId],
-//           (err, results) => {
-//             if (err) {
-//               console.error("Error updating user status:", err);
-//             } else {
-//               // Fetch updated user list and broadcast it
-//               const query =
-//                 "SELECT userid, username, status, last_seen FROM users";
-//               connection.query(query, (error, results) => {
-//                 if (error) {
-//                   console.error("Error fetching users:", error);
-//                 } else {
-//                   io.emit("update-users", results);
-//                 }
-//               });
-//             }
+//     if (disconnectedUser) {
+//       const userId = Object.keys(onlineUsers).find(
+//         (id) => onlineUsers[id].socketId === socket.id
+//       );
+
+//       // Update last seen time and status in the database
+//       const disconnectTime = new Date();
+//       const updateQuery =
+//         "UPDATE users SET status = 'offline', last_seen = ? WHERE userid = ?";
+//       connection.query(
+//         updateQuery,
+//         [disconnectTime, userId],
+//         (err, results) => {
+//           if (err) {
+//             console.error("Error updating user status:", err);
+//           } else {
+//             // Fetch updated user list and broadcast it
+//             const query =
+//               "SELECT userid, username, status, last_seen FROM users";
+//             connection.query(query, (error, results) => {
+//               if (error) {
+//                 console.error("Error fetching users:", error);
+//               } else {
+//                 io.emit("update-users", results);
+//               }
+//             });
 //           }
-//         );
+//         }
+//       );
 
-//         delete onlineUsers[id];
-//         break;
-//       }
+//       // Remove the user from the onlineUsers object
+//       delete onlineUsers[userId];
 //     }
 //   });
 // });
@@ -446,7 +449,7 @@
 //       }
 
 //       const totalCount = countResults[0].totalCount;
-//       console.log("hello total count ", totalCount);
+//       // console.log("hello total count ", totalCount);
 
 //       // Execute the messages query
 //       connection.query(
@@ -465,14 +468,13 @@
 //             res.status(500).send("Error fetching messages");
 //             return;
 //           }
-//           console.log("hello .....", messagesResults);
-//           console.log("ofset......................", offset);
+//           // console.log("hello .....", messagesResults);
+//           // console.log("ofset......................", offset);
 
 //           // Calculate the total pages
 //           const totalPages = Math.ceil(totalCount / limit);
 //           // console.log("page ...",totalPages);
 
-//           // Send the messages and pagination info
 //           res.json({
 //             messages: messagesResults,
 //             pagination: {
@@ -481,7 +483,6 @@
 //               totalCount: totalCount,
 //             },
 //           });
-//           // console.log("hello .....", messagesResults);
 //         }
 //       );
 //     }
@@ -587,6 +588,98 @@ app.get("/users", (req, res) => {
   });
 });
 
+// Create group endpoint
+app.post("/create-group", (req, res) => {
+  const { groupname } = req.body;
+  const query = "INSERT INTO groups (groupname) VALUES (?)";
+
+  connection.query(query, [groupname], (error, results) => {
+    if (error) {
+      console.error("Error creating group:", error);
+      res.status(500).send({ message: "Error creating group" });
+    } else {
+      const groupId = results.insertId;
+      const newGroup = { groupid: groupId, groupname };
+      io.emit("group-created", newGroup);
+      res.send({ message: "Group created successfully" });
+    }
+  });
+});
+
+// Fetch all groups
+app.get("/group-names", (req, res) => {
+  const query = "SELECT groupid, groupname FROM groups";
+  connection.query(query, (error, results) => {
+    if (error) {
+      console.error("Error fetching groups:", error);
+      res.status(500).send({ message: "Error fetching groups" });
+    } else {
+      res.json(results); console.log("grup name ...",results);
+    }
+  });
+});
+
+// Add user to group endpoint
+app.post("/add-to-group", (req, res) => {
+  const { groupid, userid } = req.body;
+  const query = "INSERT INTO group_members (groupid, userid) VALUES (?, ?)";
+
+  connection.query(query, [groupid, userid], (error, results) => {
+    if (error) {
+      console.error("Error adding user to group:", error);
+      res.status(500).send({ message: "Error adding user to group" });
+    } else {
+      res.send({ message: "User added to group successfully" });
+    }
+  });
+});
+// Fetch group messages endpoint with pagination
+app.get("/group-messages", (req, res) => {
+  const { groupid, page = 1, limit = 10 } = req.query;
+  const offset = (page - 1) * limit;
+
+  const countQuery =
+    "SELECT COUNT(*) AS totalCount FROM group_messages WHERE groupid = ?";
+  const messagesQuery = `
+    SELECT * FROM group_messages 
+    WHERE groupid = ? 
+    ORDER BY created_at DESC 
+    LIMIT ? OFFSET ?`;
+
+  connection.query(countQuery, [groupid], (error, countResults) => {
+    if (error) {
+      console.error("Error fetching group message count:", error);
+      res.status(500).send({ message: "Error fetching group messages" });
+      return;
+    }
+
+    const totalCount = countResults[0].totalCount;
+
+    connection.query(
+      messagesQuery,
+      [groupid, parseInt(limit), parseInt(offset)],
+      (error, messagesResults) => {
+        if (error) {
+          console.error("Error fetching group messages:", error);
+          res.status(500).send({ message: "Error fetching group messages" });
+          return;
+        }
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        res.json({
+          messages: messagesResults,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages: totalPages,
+            totalCount: totalCount,
+          },
+        });
+      }
+    );
+  });
+});
+
 // Socket.io handling
 io.on("connection", (socket) => {
   // Handle join event
@@ -640,6 +733,22 @@ io.on("connection", (socket) => {
         }
       );
     }
+  });
+  // Handle group message
+  socket.on("group-message", ({ groupid, messageData }) => {
+    const query =
+      "INSERT INTO group_messages (groupid, sender, message) VALUES (?, ?, ?)";
+    connection.query(
+      query,
+      [groupid, messageData.user, messageData.message],
+      (error, results) => {
+        if (error) {
+          console.error("Error saving group message:", error);
+        } else {
+          io.emit(`group-message-${groupid}`, messageData);
+        }
+      }
+    );
   });
 
   // Handle disconnect event

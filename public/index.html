@@ -1,8 +1,5 @@
-
-
-
 <!--                                                                                    this is chat real code                                                                       -->
-
+<!-- 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,12 +40,10 @@
 
   <div id="privateChatContainer">
     <h2 id="privateChatWith"></h2>
-    <!-- <div id="privateMessages"></div> -->
     <div id="privateMessages" style="height: 300px; overflow-y: scroll;"></div>
     <form id="privateMessageForm">
       <input type="text" id="privateMessageInput" placeholder="Type a message..." required>
       <button type="submit">Send</button>
-      <!-- <div id="loader" class="loader">Loading...</div> -->
 
     </form>
     <div class="loader">Loading...</div>
@@ -60,4 +55,82 @@
   <script src="script.js"></script>
 </body>
 
-</html>
+</html> -->
+
+
+
+
+
+
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+
+  <body>
+    <div id="registerContainer">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input type="text" id="regUserId" placeholder="User ID" required><br>
+        <input type="text" id="regUsername" placeholder="Username" required><br>
+        <input type="password" id="regPassword" placeholder="Password" required><br>
+        <button type="submit">Register</button>
+        <button onclick="showView('loginContainer')">Go to Login</button>
+
+      </form>
+    </div>
+
+    <div id="loginContainer">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Username" required><br>
+        <input type="password" id="loginPassword" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <div id="chatContainer">
+      <h2>Welcome, <span id="currentUser"></span></h2>
+      <h3>Online Users</h3>
+      <ul id="onlineUsersList"></ul>
+      <h3>Groups</h3>
+      <ul id="groupList"></ul>
+      <button id="createGroupBtn">Create Group</button>
+    </div>
+    </div>
+
+    <div id="privateChatContainer">
+      <h2 id="privateChatWith"></h2>
+      <div id="privateMessages" style="height: 300px; overflow-y: scroll;"></div>
+      <form id="privateMessageForm">
+        <input type="text" id="privateMessageInput" placeholder="Type a message..." required>
+        <button type="submit">Send</button>
+
+      </form>
+      <div class="loader">Loading...</div>
+      <button id="backToChatBtn">Back to Chat</button>
+    </div>
+
+    <div id="groupChatContainer">
+      <h2 id="groupChatWith"></h2>
+      <div id="groupMessages" style="height: 300px; overflow-y: scroll;"></div>
+      <form id="groupMessageForm">
+        <input type="text" id="groupMessageInput" placeholder="Type a message..." required>
+        <button type="submit">Send</button>
+      </form>
+      <button id="addUserToGroupBtn">Add User to Group</button>
+      <button id="backToChatBtn">Back to Chat</button>
+    </div>
+
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+  </body>
+
+  </html>
