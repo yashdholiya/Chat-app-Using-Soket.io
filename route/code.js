@@ -1540,7 +1540,7 @@ showView("registerContainer");
 //     height: 100vh;
 //     margin: 0;
 //   }
-  
+
 //   #registerContainer,
 //   #loginContainer,
 //   #chatContainer,
@@ -1554,21 +1554,21 @@ showView("registerContainer");
 //     background-color: #f9f9f9;
 //     margin: 20px;
 //   }
-  
+
 //   #registerContainer h2,
 //   #loginContainer h2,
 //   #chatContainer h2,
 //   #privateChatContainer h2 {
 //     text-align: center;
 //   }
-  
+
 //   #registerForm,
 //   #loginForm {
 //     display: flex;
 //     flex-direction: column;
 //     align-items: center;
 //   }
-  
+
 //   input[type="text"],
 //   input[type="password"],
 //   button {
@@ -1577,86 +1577,86 @@ showView("registerContainer");
 //     width: 100%;
 //     max-width: 300px;
 //   }
-  
+
 //   button {
 //     background-color: #4caf50;
 //     color: white;
 //     border: none;
 //     cursor: pointer;
 //   }
-  
+
 //   #privateChatContainer {
 //     margin-top: 50px;
 //   }
-  
+
 //   button:hover {
 //     background-color: #45a049;
 //   }
-  
+
 //   #onlineUsersList {
 //     list-style-type: none;
 //     padding: 0;
 //   }
-  
+
 //   #onlineUsersList li {
 //     padding: 8px;
 //     cursor: pointer;
 //     background-color: #ddd;
 //     margin-bottom: 5px;
 //   }
-  
+
 //   #onlineUsersList li:hover {
 //     background-color: #ccc;
 //   }
-  
+
 //   .message {
 //     border: 1px solid #ccc;
 //     padding: 10px;
 //     margin: 5px;
 //     border-radius: 8px;
 //   }
-  
+
 //   .message-user {
 //     font-weight: bold;
 //   }
-  
+
 //   .sent {
 //     align-self: flex-end;
 //     background-color: #f0f0f0;
 //   }
-  
+
 //   .received {
 //     align-self: flex-start;
 //     background-color: #e5e5e5;
 //   }
-  
+
 //   .message-timestamp {
 //     font-size: 0.8em;
 //     color: #666;
 //     margin-top: 5px;
 //   }
-  
+
 //   #privateMessages .sent {
 //     text-align: right;
 //   }
-  
+
 //   #privateMessages .received {
 //     text-align: left;
 //   }
-  
+
 //   #privateMessages {
 //     height: 600px;
 //     overflow: auto;
 //   }
-  
+
 //   .container {
 //     display: none;
 //   }
-  
+
 //   .user-item {
 //     cursor: pointer;
 //   }
-  
+
 //   #privateMessagesList {
 //     max-height: 400px;
 //     overflow-y: auto;
@@ -1664,11 +1664,11 @@ showView("registerContainer");
 //     padding: 10px;
 //     list-style-type: none;
 //   }
-  
+
 //   #privateMessagesList li {
 //     margin-bottom: 10px;
 //   }
-  
+
 //   .loader {
 //     display: none;
 //     text-align: center;
@@ -1676,10 +1676,8 @@ showView("registerContainer");
 //   .loader.show {
 //     display: block;
 //   }
-  
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 
-
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // <!--                                                                                    this is chat real code                                                                       -->
 
@@ -1734,7 +1732,6 @@ showView("registerContainer");
 //     <div class="loader">Loading...</div>
 //     <button id="backToChatBtn">Back to Chat</button>
 //   </div>
-
 
 //   <script src="/socket.io/socket.io.js"></script>
 //   <script src="script.js"></script>
