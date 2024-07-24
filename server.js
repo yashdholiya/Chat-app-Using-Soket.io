@@ -91,112 +91,6 @@ app.get("/users", (req, res) => {
   });
 });
 
-app.post("/create-group", (req, res) => {
-  const { groupname } = req.body;
-  const query = "INSERT INTO groups (groupname) VALUES (?)";
-
-  connection.query(query, [groupname], (error, results) => {
-    if (error) {
-      console.error("Error creating group:", error);
-      res.status(500).send("Error creating group");
-    } else {
-      res.send("Group created successfully");
-    }
-  });
-});
-
-// Fetch all groups
-app.get("/group-names", (req, res) => {
-  const query = "SELECT * FROM groups";
-
-  connection.query(query, (error, results) => {
-    if (error) {
-      console.error("Error fetching group names:", error);
-      res.status(500).json([]);
-    } else {
-      res.json(results);
-    }
-  });
-});
-
-// Handle adding user to group
-app.post("/add-to-group", (req, res) => {
-  const { groupid, userid } = req.body;
-  const query = "INSERT INTO group_members (groupid, userid) VALUES (?, ?)";
-
-  connection.query(query, [groupid, userid], (error, results) => {
-    if (error) {
-      console.error("Error adding user to group:", error);
-      res.status(500).send("Error adding user to group");
-    } else {
-      res.send("User added to group successfully");
-    }
-  });
-});
-
-// Fetch group messages endpoint with pagination
-app.get("/group-messages", (req, res) => {
-  const { groupid, page = 1, limit = 10 } = req.query;
-  const offset = (page - 1) * limit;
-
-  const countQuery =
-    "SELECT COUNT(*) AS totalCount FROM group_messages WHERE groupid = ?";
-  const messagesQuery = `
-    SELECT * FROM group_messages 
-    WHERE groupid = ? 
-    ORDER BY created_at DESC 
-    LIMIT ? OFFSET ?`;
-
-  connection.query(countQuery, [groupid], (error, countResults) => {
-    if (error) {
-      console.error("Error fetching group message count:", error);
-      res.status(500).send({ message: "Error fetching group messages" });
-      return;
-    }
-
-    const totalCount = countResults[0].totalCount;
-
-    connection.query(
-      messagesQuery,
-      [groupid, parseInt(limit), parseInt(offset)],
-      (error, messagesResults) => {
-        if (error) {
-          console.error("Error fetching group messages:", error);
-          res.status(500).send({ message: "Error fetching group messages" });
-          return;
-        }
-
-        const totalPages = Math.ceil(totalCount / limit);
-
-        res.json({
-          messages: messagesResults,
-          pagination: {
-            currentPage: parseInt(page),
-            totalPages: totalPages,
-            totalCount: totalCount,
-          },
-        });
-      }
-    );
-  });
-});
-
-// Fetch group members
-app.get("/group-members", (req, res) => {
-  const { groupid } = req.query;
-  const query =
-    "SELECT users.userid, users.username FROM group_members INNER JOIN users ON group_members.userid = users.userid WHERE groupid = ?";
-
-  connection.query(query, [groupid], (error, results) => {
-    if (error) {
-      console.error("Error fetching group members:", error);
-      res.status(500).json([]);
-    } else {
-      res.json(results);
-    }
-  });
-});
-
 // Socket.io handling
 io.on("connection", (socket) => {
   // Handle join event
@@ -223,92 +117,34 @@ io.on("connection", (socket) => {
         });
       }
     });
-
-    // Automatically join the user to the groups they are part of
-    const groupsQuery = "SELECT groupid FROM group_members WHERE userid = ?";
-    connection.query(groupsQuery, [userId], (err, results) => {
-      if (err) {
-        console.error("Error fetching user groups:", err);
-      } else {
-        results.forEach((row) => {
-          socket.join(`group_${row.groupid}`);
-        });
-      }
-    });
   });
   // Handle private message
-  // Handle group message
-  // socket.on("group-message", ({ groupid, messageData }) => {
-  //   const query = `
-  //     SELECT COUNT(*) AS memberCount
-  //     FROM group_members
-  //     WHERE groupid = ? AND userid = ?
-  //   `;
-  //   connection.query(query, [groupid, messageData.user], (error, results) => {
-  //     if (error) {
-  //       console.error("Error checking group membership:", error);
-  //       return;
-  //     }
-  //     const memberCount = results[0].memberCount;
-  //     if (memberCount > 0) {
-  //       const insertQuery = `
-  //         INSERT INTO group_messages (groupid, sender, message)
-  //         VALUES (?, ?, ?)
-  //       `;
-  //       connection.query(
-  //         insertQuery,
-  //         [groupid, messageData.user, messageData.message],
-  //         (error, insertResult) => {
-  //           if (error) {
-  //             console.error("Error saving group message:", error);
-  //           } else {
-  //             // Emit the message to all users in the group
-  //             io.to(`group_${groupid}`).emit("group-message", {
-  //               groupid,
-  //               ...messageData,
-  //             });
-  //           }
-  //         }
-  //       );
-  //     } else {
-  //       console.log(`User ${messageData.user} is not a member of group ${groupid}`);
-  //     }
-  //   });
-  // });
-
-  // Handle group message
-  socket.on("group-message", ({ groupid, messageData }) => {
-    const { user, message } = messageData;
-    const query =
-      "INSERT INTO group_messages (groupid, sender, message) VALUES (?, ?, ?)";
-    connection.query(
-      query,
-      [groupid, user.userid, message],
-      (error, results) => {
-        if (error) {
-          console.error("Error saving group message:", error);
-        } else {
-          // Fetch the sender's username
-          const senderQuery = "SELECT username FROM users WHERE userid = ?";
-          connection.query(senderQuery, [user.userid], (err, senderResult) => {
-            if (err) {
-              console.error("Error fetching sender username:", err);
-            } else {
-              const senderUsername = senderResult[0]?.username || "Unknown"; // Handle case where username is not found
-              // Emit the message to all users in the group
-              io.to(`group_${groupid}`).emit("group-message", {
-                groupid,
-                sender: { userid: user.userid, username: senderUsername },
-                message,
-                timestamp: new Date().toISOString(),
-              });
-            }
-          });
-        }
-      }
+  socket.on("private-message", ({ to, messageData }) => {
+    const recipient = Object.values(onlineUsers).find(
+      (user) => user.username === to
     );
-  });
+    if (recipient) {
+      console.log("messages...", messageData);
 
+      // Add a timestamp to the message data
+      messageData.timestamp = new Date().toISOString();
+
+      // Save message to the database with timestamp
+      const query =
+        "INSERT INTO messages (sender, recipient, message, created_at) VALUES (?, ?, ?, ?)";
+      connection.query(
+        query,
+        [messageData.user, to, messageData.message, messageData.timestamp],
+        (error, results) => {
+          if (error) {
+            console.error("Error saving message:", error);
+          } else {
+            io.to(recipient.socketId).emit("private-message", messageData);
+          }
+        }
+      );
+    }
+  });
   // Handle disconnect event
   socket.on("disconnect", () => {
     const userId = Object.keys(onlineUsers).find(
@@ -358,16 +194,7 @@ app.get("/messages", (req, res) => {
     ORDER BY created_at desc
     LIMIT ? OFFSET ?
   `;
-  // const messagesQuery = `
-  //     SELECT * FROM (
-  //       SELECT * FROM messages
-  //       WHERE (sender = ? AND recipient = ?) OR (sender = ? AND recipient = ?)
-  //       ORDER BY created_at DESC
-  //       LIMIT ? OFFSET ?
-  //     ) AS message_sub
-  //     ORDER BY created_at ASC
-  //   `;
-  // Execute the count query
+
   connection.query(
     countQuery,
     [sender, recipient, recipient, sender],
