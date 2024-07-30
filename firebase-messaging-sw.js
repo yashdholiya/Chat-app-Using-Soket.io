@@ -1,4 +1,4 @@
-import { initializeApp } from "./firebase.js";
+import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -12,9 +12,9 @@ const firebaseConfig = {
   storageBucket: "chat-app-23373.appspot.com",
   messagingSenderId: "720635786190",
   appId: "1:720635786190:web:75d58acc418bb130b1f19f",
-  measurementId: "G-BS5V5G8PZ1"
+  measurementId: "G-BS5V5G8PZ1",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);  
+const analytics = getAnalytics(app);

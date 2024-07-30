@@ -1,4 +1,4 @@
-// server code 
+// server code
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
@@ -253,8 +253,7 @@ server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
 
-
-// clint side code 
+// clint side code
 const socket = io();
 let userId = "";
 let username = "";
@@ -494,7 +493,7 @@ document
 
 showView("registerContainer");
 
-//  html code 
+//  html code
 
 // <!DOCTYPE html>
 // <html lang="en">
@@ -557,7 +556,6 @@ showView("registerContainer");
 //     <button id="addUserToGroupBtn">Add User to Group</button>
 //     <button id="backToChatBtn">Back to Chat</button>
 //   </div>
-
 
 //   <script src="/socket.io/socket.io.js"></script>
 //   <script src="script.js"></script>
