@@ -64,6 +64,71 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.6.7/firebase-messaging.js"></script>
+  <script type="module">
+    // Initialize Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import {
+      getMessaging,
+      getToken,
+      onMessage,
+    } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging.js";
+
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9KxDiUTiTEa8a4Clz3qB9gCJKlw1ikd4",
+      authDomain: "chat-app-23373.firebaseapp.com",
+      projectId: "chat-app-23373",
+      storageBucket: "chat-app-23373.appspot.com",
+      messagingSenderId: "720635786190",
+      appId: "1:720635786190:web:75d58acc418bb130b1f19f",
+      measurementId: "G-BS5V5G8PZ1",
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const messaging = getMessaging(app);
+
+    Notification.requestPermission()
+      .then((permission) => {
+        if (permission === "granted") {
+          getToken(messaging, {
+            vapidKey:
+              "BBHA7z1NSxlctxRFwW20lSnRAQdYNgrYlMZtwlzdV9Pipdgs3uhRwfeqd4k2Y50YpHI0iuYvtjUch-V_lmiVZAs",
+          })
+            .then((currentToken) => {
+              if (currentToken) {
+                console.log(currentToken);
+
+                onMessage(messaging, (payload) => {
+                  const notificationTitle = payload.notification.title;
+                  const notificationOptions = {
+                    body: payload.notification.body,
+                    icon: payload.notification.image,
+                  };
+
+                  new Notification(notificationTitle, notificationOptions);
+                });
+              } else {
+                alert("! token not generated ! check permission !");
+              }
+            })
+            .catch((error) => {
+              alert("Token : " + error);
+            });
+        } else {
+          alert("! permission denied !");
+        }
+      })
+      .catch(
+        (error) =>
+          function () {
+            alert("Permission : " + error);
+          }
+      );
+
+
+  </script>
   <script src="script.js"></script>
 </body>
 
