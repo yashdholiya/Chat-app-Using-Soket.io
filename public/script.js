@@ -1,3 +1,52 @@
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9KxDiUTiTEa8a4Clz3qB9gCJKlw1ikd4",
+    authDomain: "chat-app-23373.firebaseapp.com",
+    projectId: "chat-app-23373",
+    storageBucket: "chat-app-23373.appspot.com",
+    messagingSenderId: "720635786190",
+    appId: "1:720635786190:web:75d58acc418bb130b1f19f",
+    measurementId: "G-BS5V5G8PZ1",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+
+  messaging
+    .requestPermission()
+    .then(() => messaging.getToken())
+    .then((token) => {
+      console.log("FCM Token:", token);
+
+      // Save token in the server when logging in
+      if (userId) {
+        // Ensure userId is available after login
+        fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password: document.getElementById("loginPassword").value,
+            fcmToken: token,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.message);
+          })
+          .catch((error) => {
+            console.error("Error saving FCM token:", error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error("Error getting FCM token:", error);
+    });
+});
+
 const socket = io();
 let userId = "";
 let username = "";
@@ -67,7 +116,7 @@ document.getElementById("registerForm").addEventListener("submit", (event) => {
 document.getElementById("loginForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const loginUsername = document.getElementById("loginUsername").value;
-  const loginPassword = document.getElementById("loginPassword").value;
+  const loginPassword = document.getElementById("loginPassword").value; 
 
   fetch("/login", {
     method: "POST",

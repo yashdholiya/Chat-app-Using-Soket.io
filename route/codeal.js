@@ -1,9 +1,26 @@
-// server code 
+
+//  firebase .json
+{
+  "type": "service_account",
+  "project_id": "chat-app-23373",
+  "private_key_id": "664f33dbeb932d1d71aa0da0a3c26fcc1feeadcf",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDCIBOC9ftV9i/z\nRLm5mJjbeyumx24+tQqEZcMiGR4l4O1N8AICdZsL3L+cQRikIOG6KB5LqWw7BTvi\n7dOm/x6mUPo1cbjfZwLzNGQhMOe2ulI2sRxszF5ZUO2O4th46bGu4aMpOLUyb9UZ\nY6W84Cg2z/rT40tHLY8mgmqlE2fCOB/ponmQ1KFcvweInZYp5K3ThScdgdp64vyJ\njonNPk1mvNJUSV9Rd6Mxd3TsOPENs8bLfwWuEhpEDGsbg8RdtHg7xH3kGRfRXBsB\nZ/tEUTJUmbcJiwz9cauxwrSwUKDYOJDdvdYIjSyOBn2mk+ARXjJWdLKhD78lToYL\nt6MSpWPrAgMBAAECggEACUpgtK1SFIiePd3Fp7jCZAquiaJUx+KBONnn71tVYomz\nwb2hUv3O6E/tyawh4kUCmJav8H4QxHhZJ+Cq9vyRunL4rpMdPm/fJ8WTnzUIeenL\n4nsyeZCEWXDylZqMsqi4jL6WwPPKVDoe8EKhHXt64Tit7/MaWLM4/SZTtUfK+PQC\nWGK8dDNtIWkrMxLymjGhY5Qe0yTyfN0dI1BaMcqE87A92ozFC7w7T0bNOh1bDokw\n8VNT46aWCh0Om10fpZOdV1WPeGJJDljma/VRGC48CekERfY9N8qvjlGIYX4XqUPL\nTNsE5+0ii22gEeIGMCEe90BmVMR0wKBN428u1HzmFQKBgQDfusjKCdGjYg8jYTF4\nk4cqC5PYCjLCkLHN7and7wICKBnshoQSkU6UodbO7RXnjqCkdBbFkFGYP5NTVhSy\n4EwSNagakTx+9EKgvbRR3kWMoXd76f4spWV3AM061/sMvtwh18ILY5ZlT76lKiaV\nC+4qn/vWawJCP8ZgCfW4lsLFHQKBgQDeICbzpOTt1PRR/oTU+aL3YNDAI0jB0k9h\nlhlbLOY/OsjOekOEStmtmKMtp8GcLPxnopkAK0MVcnKWCxPRE1zQtHVejbBIVccZ\n9wAtArAC5cYwmJdZi+zA/rw0GVi1VHUT146FuJcU5jL98uPhbwc5BX2rRDsnBqou\nwvICV/6mpwKBgGPAP+302sdh3SYFG62K+WTBrLVSNreRE/Wg1W/iNJ8JiiVvBEvT\nBZo3XjL8ehu399/a8pw7cGXVUraBVtE6ODCWQ9E0mChyd5J7gn5N/+xnwYI6Hd2C\nEO8yKE7oJULVhgiAzj+Ns2yQVYwGcxVZMGNI2VwMcgFfte70Ad6/OS/xAoGBAInH\nccHRNzsay42MjUI5sk81m2aCvF+VHy4N156JZCw2P1Zr2jNV5l3afuUT2HESKmHy\nJmtHam4ENnVBW8Jk+z5toRvMUVsc8cn2PwKsVxcFBYEhNUgTFgDEQWMjkbWwNIrh\nOwNQ803AWELTBWzQ3K8O69tvEC3t4WPuAgVYJZmjAoGAUSYXKHKbKI0UNwRLxKhl\nZ19Jo3DvprVRUHocEAzjbBPkGsoM9DKrvw9VrhF9JyquYp1YhXk5OIyJDoNzyLBW\nhnVEuslpc49kHykXz7XZ819vDuiJ3pqJws9ct/H7SZCn0Z3iNrZ5L+hGmzkT3vfW\n3P0G31cyW1TYz69sHIuPRo0=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-v51h4@chat-app-23373.iam.gserviceaccount.com",
+  "client_id": "108803223211462470811",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-v51h4%40chat-app-23373.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
+
+// seerver 
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
 const bcrypt = require("bcrypt");
 const mysql = require("mysql");
+const admin = require("firebase-admin");
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +35,12 @@ const connection = mysql.createConnection({
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
+
+// Initialize Firebase Admin SDK
+const serviceAccount = require("./firebase.json");
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 let onlineUsers = {};
 
@@ -42,9 +65,8 @@ app.post("/register", (req, res) => {
   );
 });
 
-// User login endpoint
 app.post("/login", (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, fcmToken } = req.body;
   const query = "SELECT * FROM users WHERE username = ?";
 
   connection.query(query, [username], (error, results) => {
@@ -55,20 +77,25 @@ app.post("/login", (req, res) => {
       if (results.length > 0) {
         const user = results[0];
         if (bcrypt.compareSync(password, user.password)) {
-          const updateQuery =
-            "UPDATE users SET status = 'online' WHERE userid = ?";
-          connection.query(updateQuery, [user.userid], (err, updateResult) => {
-            if (err) {
-              console.error("Error updating user status:", err);
-              res.status(500).send("Error logging in");
-            } else {
-              res.send({
-                message: "Login successful",
-                userid: user.userid,
-                username: user.username,
-              });
+          const updateQuery = `
+            UPDATE users SET status = 'online', fcm_token = ? WHERE userid = ?
+          `;
+          connection.query(
+            updateQuery,
+            [fcmToken, user.userid],
+            (err, updateResult) => {
+              if (err) {
+                console.error("Error updating user status:", err);
+                res.status(500).send("Error logging in");
+              } else {
+                res.send({
+                  message: "Login successful",
+                  userid: user.userid,
+                  username: user.username,
+                });
+              }
             }
-          });
+          );
         } else {
           res.status(401).send("Invalid password");
         }
@@ -119,15 +146,13 @@ io.on("connection", (socket) => {
       }
     });
   });
+
   // Handle private message
   socket.on("private-message", ({ to, messageData }) => {
     const recipient = Object.values(onlineUsers).find(
       (user) => user.username === to
     );
     if (recipient) {
-      console.log("messages...", messageData);
-
-      // Add a timestamp to the message data
       messageData.timestamp = new Date().toISOString();
 
       // Save message to the database with timestamp
@@ -141,11 +166,50 @@ io.on("connection", (socket) => {
             console.error("Error saving message:", error);
           } else {
             io.to(recipient.socketId).emit("private-message", messageData);
+
+            // Fetch FCM token from the database
+            const fcmTokenQuery =
+              "SELECT fcm_token FROM users WHERE username = ?";
+            connection.query(fcmTokenQuery, [to], (err, result) => {
+              // console.log("token...",fcmTokenQuery);
+              if (err) {
+                console.error("Error fetching FCM token:", err);
+              } else if (result.length > 0) {
+                const fcmToken = result[0].fcm_token;
+                if (fcmToken) {
+                  // Send notification via Firebase
+                  const message = {
+                    notification: {
+                      title: `New message from ${messageData.user}`,
+                      body: messageData.message,
+                    },
+                    token: fcmToken,
+                  };
+                  // console.log("..message ...fcToken..",message,fcmToken);
+
+                  admin
+                    .messaging()
+                    .send(message)
+                    .then((response) => {
+                      console.log("Successfully sent message:", response);
+                    })
+                    .catch((error) => {
+                      console.error("Error sending message:", error);
+                    });
+                } else {
+                  console.log("...fcmToken...", fcmToken);
+                  console.error("FCM token is missing for user:", to);
+                }
+              } else {
+                console.error("No FCM token found for user:", to);
+              }
+            });
           }
         }
       );
     }
   });
+
   // Handle disconnect event
   socket.on("disconnect", () => {
     const userId = Object.keys(onlineUsers).find(
@@ -207,7 +271,6 @@ app.get("/messages", (req, res) => {
       }
 
       const totalCount = countResults[0].totalCount;
-      // console.log("hello total count ", totalCount);
 
       // Execute the messages query
       connection.query(
@@ -226,12 +289,9 @@ app.get("/messages", (req, res) => {
             res.status(500).send("Error fetching messages");
             return;
           }
-          // console.log("hello .....", messagesResults);
-          // console.log("ofset......................", offset);
 
           // Calculate the total pages
           const totalPages = Math.ceil(totalCount / limit);
-          // console.log("page ...",totalPages);
 
           res.json({
             messages: messagesResults,
@@ -255,6 +315,55 @@ server.listen(PORT, () => {
 
 
 // clint side code 
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9KxDiUTiTEa8a4Clz3qB9gCJKlw1ikd4",
+    authDomain: "chat-app-23373.firebaseapp.com",
+    projectId: "chat-app-23373",
+    storageBucket: "chat-app-23373.appspot.com",
+    messagingSenderId: "720635786190",
+    appId: "1:720635786190:web:75d58acc418bb130b1f19f",
+    measurementId: "G-BS5V5G8PZ1",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const messaging = firebase.messaging();
+
+  messaging
+    .requestPermission()
+    .then(() => messaging.getToken())
+    .then((token) => {
+      console.log("FCM Token:", token);
+
+      // Save token in the server when logging in
+      if (userId) {
+        // Ensure userId is available after login
+        fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password: document.getElementById("loginPassword").value,
+            fcmToken: token,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.message);
+          })
+          .catch((error) => {
+            console.error("Error saving FCM token:", error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error("Error getting FCM token:", error);
+    });
+});
+
 const socket = io();
 let userId = "";
 let username = "";
@@ -324,7 +433,7 @@ document.getElementById("registerForm").addEventListener("submit", (event) => {
 document.getElementById("loginForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const loginUsername = document.getElementById("loginUsername").value;
-  const loginPassword = document.getElementById("loginPassword").value;
+  const loginPassword = document.getElementById("loginPassword").value; 
 
   fetch("/login", {
     method: "POST",
@@ -494,73 +603,13 @@ document
 
 showView("registerContainer");
 
-//  html code 
 
-// <!DOCTYPE html>
-// <html lang="en">
+// firebase.json
+const admin = require("firebase-admin");
+const serviceAccount = require("./firebase.json");
 
-// <head>
-//   <meta charset="UTF-8">
-//   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//   <title>Chat App</title>
-//   <link rel="stylesheet" href="style.css">
-// </head>
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
-// <body>
-//   <div id="registerContainer">
-//     <h2>Register</h2>
-//     <form id="registerForm">
-//       <input type="text" id="regUserId" placeholder="User ID" required><br>
-//       <input type="text" id="regUsername" placeholder="Username" required><br>
-//       <input type="password" id="regPassword" placeholder="Password" required><br>
-//       <button type="submit">Register</button>
-//       <button type="button" onclick="showView('loginContainer')">Go to Login</button>
-//     </form>
-//   </div>
-
-//   <div id="loginContainer">
-//     <h2>Login</h2>
-//     <form id="loginForm">
-//       <input type="text" id="loginUsername" placeholder="Username" required><br>
-//       <input type="password" id="loginPassword" placeholder="Password" required><br>
-//       <button type="submit">Login</button>
-//     </form>
-//   </div>
-
-//   <div id="chatContainer">
-//     <h2>Welcome, <span id="currentUser"></span></h2>
-//     <h3>Online Users</h3>
-//     <ul id="onlineUsersList"></ul>
-//     <h3>Groups</h3>
-//     <ul id="groupList"></ul>
-//     <button id="createGroupBtn">Create Group</button>
-//   </div>
-
-//   <div id="privateChatContainer">
-//     <h2 id="privateChatWith"></h2>
-//     <div id="privateMessages" style="height: 300px; overflow-y: scroll;"></div>
-//     <form id="privateMessageForm">
-//       <input type="text" id="privateMessageInput" placeholder="Type a message..." required>
-//       <button type="submit">Send</button>
-//     </form>
-//     <div class="loader">Loading...</div>
-//     <button id="backToChatBtn">Back to Chat</button>
-//   </div>
-
-//   <div id="groupChatContainer">
-//     <h2 id="groupChatWith"></h2>
-//     <div id="groupMessages" style="height: 300px; overflow-y: scroll;"></div>
-//     <form id="groupMessageForm">
-//       <input type="text" id="groupMessageInput" placeholder="Type a message..." required>
-//       <button type="submit">Send</button>
-//     </form>
-//     <button id="addUserToGroupBtn">Add User to Group</button>
-//     <button id="backToChatBtn">Back to Chat</button>
-//   </div>
-
-
-//   <script src="/socket.io/socket.io.js"></script>
-//   <script src="script.js"></script>
-// </body>
-
-// </html>
+module.exports = admin;
